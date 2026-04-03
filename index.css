@@ -1,0 +1,254 @@
+:root {
+  --primary: #1B3F72;
+  --primary-light: #2563a8;
+  --accent: #C0392B;
+  --accent-light: #f88;
+
+  --bg: #0f2747;
+  --card-bg: rgba(255, 255, 255, 0.9);
+
+  --text-dark: #1a2433;
+  --text-light: #ffffff;
+  --muted: #6b7a90;
+
+  --border: #e0e6ef;
+  --radius: 14px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.logo-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+  background: #C0392B;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+/* منع scroll */
+html, body {
+  height: 100%;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* Background gradient + glass effect */
+.page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at top, #1b3f72, #0f2747);
+  position: relative;
+  padding: 20px;
+}
+
+/* Decorative blur circles */
+.page::before,
+.page::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+}
+
+.page::before {
+  top: -80px;
+  right: -80px;
+  width: 300px;
+  height: 300px;
+  background: var(--primary-light);
+}
+
+.page::after {
+  bottom: -100px;
+  left: -100px;
+  width: 350px;
+  height: 350px;
+  background: var(--accent);
+}
+
+/* HERO */
+.hero {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  z-index: 2;
+}
+
+.logo-text {
+  font-family: 'DM Serif Display', serif;
+  color: var(--text-light);
+  font-size: 24px;
+}
+
+.hero h1 {
+  font-family: 'DM Serif Display', serif;
+  color: var(--text-light);
+  font-size: 38px;
+}
+
+.hero h1 span {
+  color: var(--accent-light);
+}
+
+.hero p {
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+}
+
+/* CARD (glass effect) */
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  z-index: 2;
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* HEADER */
+.card-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.card-header h2 {
+  font-family: 'DM Serif Display', serif;
+  color: var(--primary);
+}
+
+.card-header p {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ERROR */
+.error-msg {
+  display: none;
+  background: #ffe5e5;
+  color: #c0392b;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.error-msg.show {
+  display: block;
+}
+
+/* FORM */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(37,99,168,0.2);
+}
+
+/* PASSWORD */
+.pw-wrap {
+  position: relative;
+}
+
+.toggle-pw {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* BUTTON */
+.btn-login {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  margin-top: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+  transform: scale(1.03);
+  box-shadow: 0 10px 20px rgba(37,99,168,0.3);
+}
+
+/* LINKS */
+.forgot {
+  font-size: 12px;
+  display: block;
+  text-align: right;
+  margin-top: 6px;
+  color: var(--primary-light);
+  text-decoration: none;
+}
+
+.signup-link {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 14px;
+}
+
+.signup-link a {
+  color: var(--accent);
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 26px;
+  }
+
+  .card {
+    padding: 1.5rem;
+  }
+}

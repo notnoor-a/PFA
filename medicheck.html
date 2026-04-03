@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>MediCheck — Symptom Checker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="medi.css" />
+</head>
+
+<body>
+  <nav>
+    <a class="logo" href="medicheck.html"><div class="logo-cross"></div>MediCheck</a>
+    <ul class="nav-links">
+      <li><a href="medicheck.html" class="active">Home</a></li>
+      <li><a href="find-a-doctor.html">Find a Doctor</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+  </nav>
+
+  <section class="top">
+    <h1>What are you <span>feeling</span> today?</h1>
+    <p>Describe your symptoms and we'll help identify possible conditions and connect you with the right specialist.</p>
+  </section>
+
+  <main class="main">
+    <div class="disclaimer">
+      <div class="disclaimer-icon">!</div>
+      <p><strong>Important:</strong> This tool is for informational purposes only. Always consult a qualified healthcare provider for medical decisions.</p>
+    </div>
+
+    <div class="card">
+      <div class="step-label"><div class="step-num">1</div>Symptoms</div>
+      <h2>Select your symptoms</h2>
+      <p class="sub">Choose from common symptoms below, or type your own.</p>
+      <div class="symptoms-tags" id="tagList">
+        <div class="tag" data-symptom="Headache"            onclick="toggleTag(this)">Headache</div>
+        <div class="tag" data-symptom="Fever"               onclick="toggleTag(this)">Fever</div>
+        <div class="tag" data-symptom="Fatigue"             onclick="toggleTag(this)">Fatigue</div>
+        <div class="tag" data-symptom="Cough"               onclick="toggleTag(this)">Cough</div>
+        <div class="tag" data-symptom="Sore throat"         onclick="toggleTag(this)">Sore throat</div>
+        <div class="tag" data-symptom="Nausea"              onclick="toggleTag(this)">Nausea</div>
+        <div class="tag" data-symptom="Shortness of breath" onclick="toggleTag(this)">Shortness of breath</div>
+        <div class="tag" data-symptom="Chest pain"          onclick="toggleTag(this)">Chest pain</div>
+        <div class="tag" data-symptom="Back pain"           onclick="toggleTag(this)">Back pain</div>
+        <div class="tag" data-symptom="Dizziness"           onclick="toggleTag(this)">Dizziness</div>
+        <div class="tag" data-symptom="Rash"                onclick="toggleTag(this)">Rash</div>
+        <div class="tag" data-symptom="Joint pain"          onclick="toggleTag(this)">Joint pain</div>
+        <div class="tag" data-symptom="Vomiting"            onclick="toggleTag(this)">Vomiting</div>
+        <div class="tag" data-symptom="Loss of appetite"    onclick="toggleTag(this)">Loss of appetite</div>
+        <div class="tag" data-symptom="Blurred vision"      onclick="toggleTag(this)">Blurred vision</div>
+      </div>
+      <div class="input-row">
+        <input type="text" id="customSymptom" placeholder="Add a symptom not listed above..." onkeydown="if(event.key==='Enter')addCustom()" />
+        <button class="btn-sm" onclick="addCustom()">+ Add</button>
+      </div>
+      <div class="sel-tags" id="selTags"></div>
+      <div class="row2">
+        <div><label class="field-label">Age group</label>
+          <select>
+            <option value=""  disabled selected hidden>Select...</option>
+            <option>Child (0–12)</option>
+            <option>Teenager (13–17)</option>
+            <option>Adult (18–40)</option>
+            <option>Middle-aged (41–60)</option>
+            <option>Senior (60+)</option>
+          </select></div>
+        <div><label class="field-label">Biological sex</label>
+          <select>
+            <option value="" disabled selected hidden>Select...</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div><label class="field-label">Duration</label>
+          <select>
+            <option value=""  disabled selected hidden>Select...</option>
+            <option>Less than a day</option>
+            <option>1–3 days</option>
+            <option>4–7 days</option>
+            <option>1–4 weeks</option>
+            <option>More than a month</option>
+          </select></div>
+        <div><label class="field-label">Severity</label>
+          <select>
+            <option value="" disabled selected hidden>Select...</option>
+            <option>Mild</option>
+            <option>Moderate</option>
+            <option>Severe</option>
+          </select></div>
+      </div>
+      <button class="btn-diagnose" onclick="runDiagnosis()">Analyze My Symptoms →</button>
+    </div>
+
+    <div class="loading" id="loader">
+      <div class="spinner"></div>
+      <p style="font-size:15px; font-weight:500; color:var(--b)">Analyzing your symptoms...</p>
+      <p style="font-size:13px; color:var(--mu); margin-top:4px">Cross-referencing with medical database</p>
+    </div>
+
+    <div class="results" id="results">
+      <div class="step-label"><div class="step-num">2</div>Possible conditions</div>
+      <div id="condList"></div>
+      <div class="card" style="margin-top:2rem">
+        <div class="step-label"><div class="step-num">3</div>Find a doctor near you</div>
+        <h2>Specialists in your area</h2>
+        <p class="sub">Recommended specialists based on your results.</p>
+        <div class="loc-row">
+          <div class="loc-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1C5.24 1 3 3.24 3 6c0 3.75 5 9 5 9s5-5.25 5-9c0-2.76-2.24-5-5-5zm0 6.75A1.75 1.75 0 1 1 8 4.25a1.75 1.75 0 0 1 0 3.5z" fill="#1B3F72"/></svg></div>
+          <input type="text" value="Tunis, Tunisia" />
+          <button class="btn-sm">Update</button>
+        </div>
+        <div class="map-ph">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" fill="#1B3F72"/></svg>
+          <span>Interactive map — connect Google Maps API to enable</span>
+        </div>
+        <div class="doc-grid" id="docGrid"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+  const sel = new Set();
+
+  function toggleTag(el) {
+    const s = el.dataset.symptom;
+    el.classList.toggle('active');
+    el.classList.contains('active') ? sel.add(s) : sel.delete(s);
+    renderSel();
+  }
+
+  function addCustom() {
+    const inp = document.getElementById('customSymptom');
+    const v = inp.value.trim();
+    if (v) { sel.add(v); renderSel(); inp.value = ''; }
+  }
+
+  function removeSymptom(s) {
+    sel.delete(s);
+    document.querySelectorAll('.tag').forEach(t => { if (t.dataset.symptom === s) t.classList.remove('active'); });
+    renderSel();
+  }
+
+  function renderSel() {
+    document.getElementById('selTags').innerHTML = [...sel].map(s =>
+      `<div class="sel-tag">${s}<button onclick="removeSymptom('${s.replace(/'/g,"\\'")}')">×</button></div>`
+    ).join('');
+  }
+
+  const condDB = {
+    'Fever,Cough,Sore throat':[
+      {name:'Influenza (Flu)',match:88,desc:'A viral respiratory illness causing fever, muscle aches, and upper respiratory symptoms.',specs:['General Practitioner','Infectious Disease'],tags:['Viral','Respiratory']},
+      {name:'Common Cold',match:70,desc:'A mild viral infection of the upper respiratory tract with sneezing and congestion.',specs:['General Practitioner'],tags:['Viral']},
+      {name:'COVID-19',match:62,desc:'Infection by SARS-CoV-2; can range from mild to severe respiratory illness.',specs:['General Practitioner','Pulmonologist'],tags:['Viral','Respiratory']}
+    ],
+    'Headache,Dizziness,Fatigue':[
+      {name:'Migraine',match:84,desc:'Recurring moderate-to-severe headaches, sometimes with nausea and light sensitivity.',specs:['Neurologist'],tags:['Neurological','Chronic']},
+      {name:'Tension Headache',match:72,desc:'The most common headache type, felt as pressure or tightness around the head.',specs:['General Practitioner'],tags:['Common']},
+      {name:'Anemia',match:55,desc:'Low red blood cell count causing fatigue, pallor, dizziness, and headaches.',specs:['Hematologist'],tags:['Blood']}
+    ],
+    'Chest pain,Shortness of breath':[
+      {name:'Angina Pectoris',match:75,desc:'Chest pain caused by reduced blood flow to the heart, often triggered by exertion.',specs:['Cardiologist'],tags:['Cardiac','Urgent']},
+      {name:'Anxiety / Panic Attack',match:65,desc:'Intense fear episodes triggering physical reactions like chest tightness.',specs:['Psychiatrist'],tags:['Mental Health']},
+      {name:'Asthma',match:58,desc:'Airways narrow and swell, causing breathing difficulty and wheezing.',specs:['Pulmonologist','Allergist'],tags:['Respiratory','Chronic']}
+    ],
+    default:[
+      {name:'Viral Infection (unspecified)',match:70,desc:'Your symptoms are consistent with a general viral infection.',specs:['General Practitioner'],tags:['Viral']},
+      {name:'Stress-related Illness',match:55,desc:'Physical symptoms can be triggered or worsened by prolonged stress.',specs:['General Practitioner','Psychiatrist'],tags:['Mental Health']},
+      {name:'Nutritional Deficiency',match:45,desc:'Low vitamins or minerals can cause a wide range of systemic symptoms.',specs:['Nutritionist'],tags:['Nutritional']}
+    ]
+  };
+
+  const docDB = [
+    {name:'Dr. Sana Khelifi',spec:'General Practitioner',rating:5,dist:'0.8 km',avail:true,ini:'SK',av:'av-r'},
+    {name:'Dr. Amine Ben Slama',spec:'Cardiologist',rating:4,dist:'1.4 km',avail:true,ini:'AB',av:'av-b'},
+    {name:'Dr. Leila Mhiri',spec:'Neurologist',rating:5,dist:'2.1 km',avail:false,ini:'LM',av:'av-r'},
+    {name:'Dr. Karim Trabelsi',spec:'Pulmonologist',rating:4,dist:'2.6 km',avail:true,ini:'KT',av:'av-b'},
+    {name:'Dr. Rima Abidi',spec:'Infectious Disease',rating:5,dist:'3.0 km',avail:false,ini:'RA',av:'av-r'},
+    {name:'Dr. Fares Gharbi',spec:'General Practitioner',rating:4,dist:'0.5 km',avail:true,ini:'FG',av:'av-b'}
+  ];
+
+  const lk = m => m>=75?'lk-high':m>=55?'lk-mid':'lk-low';
+  const stars = r => Array.from({length:5},(_,i)=>`<span class="${i<r?'sf':'se'}">★</span>`).join('');
+
+  function matchConds() {
+    const syms = [...sel];
+    for (const k of Object.keys(condDB)) {
+      if (k==='default') continue;
+      if (k.split(',').filter(kw=>syms.some(s=>s.toLowerCase().includes(kw.toLowerCase()))).length>=2) return condDB[k];
+    }
+    return condDB.default;
+  }
+
+  function runDiagnosis() {
+    if (!sel.size) return alert('Please select at least one symptom.');
+    document.getElementById('loader').classList.add('on');
+    document.getElementById('results').classList.remove('on');
+    setTimeout(renderResults, 2000);
+  }
+
+  function renderResults() {
+    document.getElementById('loader').classList.remove('on');
+    document.getElementById('condList').innerHTML = matchConds().map(c => `
+      <div class="condition-card">
+        <div class="lk-wrap"><div class="lk-circle ${lk(c.match)}">${c.match}%</div><span>match</span></div>
+        <div class="cond-body"><h3>${c.name}</h3><p>${c.desc}</p>
+          <div class="cond-tags">
+            ${c.specs.map(s=>`<span class="c-tag">${s}</span>`).join('')}
+            ${c.tags.map(t=>`<span class="c-tag r">${t}</span>`).join('')}
+          </div>
+        </div>
+      </div>`).join('');
+
+    document.getElementById('docGrid').innerHTML = [...docDB].sort(()=>Math.random()-.5).slice(0,4).map(d => `
+      <div class="doc-card">
+        <div class="doc-av ${d.av}">${d.ini}</div>
+        <h4>${d.name}</h4><div class="spec">${d.spec}</div>
+        <div class="stars">${stars(d.rating)}</div>
+        <div class="doc-meta"><span>${d.dist} away</span><span class="${d.avail?'avail':''}">${d.avail?'Available today':'Next week'}</span></div>
+        <button class="btn-book">Book Appointment</button>
+      </div>`).join('');
+
+    const r = document.getElementById('results');
+    r.classList.add('on');
+    r.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  </script>
+</body>
+</html>

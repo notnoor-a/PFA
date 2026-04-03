@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Medic — Connexion</title>
+  <link rel="stylesheet" href="index.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />    
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ── TOP HERO ── -->
+  <div class="hero">
+        <div class="logo-icon">+</div>
+      <span class="logo-text">Smart Medic</span>
+
+    <h1>Votre santé, notre <span>priorité</span></h1>
+    <p>Connectez-vous pour accéder au vérificateur de symptômes,<br>trouver un médecin et gérer votre suivi médical.</p>
+  </div>
+
+  <!-- ── LOGIN CARD ── -->
+  <div class="center">
+    <div class="card">
+      <div class="card-header">
+        <h2>Connexion</h2>
+        <p>Bienvenue ! Veuillez entrer vos informations.</p>
+      </div>
+
+      <div class="error-msg" id="errorMsg">
+        Adresse e-mail ou mot de passe incorrect.
+      </div>
+
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label for="email">Adresse e-mail</label>
+          <input type="email" id="email" placeholder="exemple@email.com" autocomplete="email" required />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Mot de passe</label>
+          <div class="pw-wrap">
+            <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required />
+            <button type="button" class="toggle-pw" id="togglePw" aria-label="Afficher le mot de passe">
+              <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <a href="#" class="forgot">Mot de passe oublié ?</a>
+        </div>
+
+        <button type="submit" class="btn-login" id="loginBtn" >
+          <span class="btn-text">Se connecter</span>
+          <div class="spinner"></div>
+        </button>
+      </form>
+      <div class="signup-link">
+        Vous n'avez pas de compte ?
+        <a href="signup.html">Sign up</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const togglePw = document.getElementById('togglePw');
+  const pwInput  = document.getElementById('password');
+  const eyeIcon  = document.getElementById('eyeIcon');
+
+  togglePw.addEventListener('click', () => {
+    const show = pwInput.type === 'password';
+    pwInput.type = show ? 'text' : 'password';
+    eyeIcon.innerHTML = show
+      ? `<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
+         <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
+         <line x1="1" y1="1" x2="23" y2="23"/>`
+      : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+  });
+
+  const form     = document.getElementById('loginForm');
+  const loginBtn = document.getElementById('loginBtn');
+  const errorMsg = document.getElementById('errorMsg');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorMsg.classList.remove('show');
+
+    const email = document.getElementById('email').value.trim();
+    const pw    = document.getElementById('password').value;
+
+    if (!email || !pw) {
+      errorMsg.textContent = 'Veuillez remplir tous les champs.';
+      errorMsg.classList.add('show');
+      return;
+    }
+
+    loginBtn.classList.add('loading');
+    await new Promise(r => setTimeout(r, 1400));
+    loginBtn.classList.remove('loading');
+
+    window.location.href = 'smart.html';
+  });
+</script>
+
+</body>
+</html>
