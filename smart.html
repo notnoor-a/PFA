@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Smart Medic — Symptom Checker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="smart.css">
+<link rel="stylesheet" href="nav.css">
+<script src="smart.js" defer></script>
+</head>
+
+<body>
+   <nav class="navbar">
+  <div class="navdiv">
+    <div class="logo">
+      <a href="smart.html" class="logo-icon">+</a>
+      <a href="smart.html" class="logo-text">Smart Medic</a>
+    </div>
+    <ul>
+      <li><a href="smart.html">Home</a></li>
+      <li><a href="doc.html">Find a Doctor</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+  </div>
+</nav>
+  <section class="top">
+    <h1>What are you <span>feeling</span> today?</h1>
+    <p>Describe your symptoms and we'll help identify possible conditions and connect you with the right specialist.</p>
+  </section>
+  <main class="main">
+    <div class="disclaimer">
+      <div class="disclaimer-icon">!</div>
+      <p><strong>Important:</strong> This tool is for informational purposes only. Always consult a qualified healthcare provider for medical decisions.</p>
+    </div>
+    <div class="card">
+      <div class="label2"><div class="num2">1</div>Symptoms</div>
+      <h2>Select your symptoms</h2>
+      <p class="sub">Choose from common symptoms below, or type your own.</p>
+      <div class="symptoms-tags" id="tagList">
+        <div class="tag" data-symptom="Headache" onclick="toggleTag(this)">Headache</div>
+        <div class="tag" data-symptom="Fever" onclick="toggleTag(this)">Fever</div>
+        <div class="tag" data-symptom="Fatigue" onclick="toggleTag(this)">Fatigue</div>
+        <div class="tag" data-symptom="Cough" onclick="toggleTag(this)">Cough</div>
+        <div class="tag" data-symptom="Sore throat" onclick="toggleTag(this)">Sore throat</div>
+        <div class="tag" data-symptom="Nausea" onclick="toggleTag(this)">Nausea</div>
+        <div class="tag" data-symptom="Shortness of breath" onclick="toggleTag(this)">Shortness of breath</div>
+        <div class="tag" data-symptom="Chest pain" onclick="toggleTag(this)">Chest pain</div>
+        <div class="tag" data-symptom="Back pain" onclick="toggleTag(this)">Back pain</div>
+        <div class="tag" data-symptom="Dizziness" onclick="toggleTag(this)">Dizziness</div>
+        <div class="tag" data-symptom="Rash" onclick="toggleTag(this)">Rash</div>
+        <div class="tag" data-symptom="Joint pain" onclick="toggleTag(this)">Joint pain</div>
+        <div class="tag" data-symptom="Vomiting" onclick="toggleTag(this)">Vomiting</div>
+        <div class="tag" data-symptom="Loss of appetite" onclick="toggleTag(this)">Loss of appetite</div>
+        <div class="tag" data-symptom="Blurred vision" onclick="toggleTag(this)">Blurred vision</div>
+      </div>
+      <div class="input-row">
+        <input type="text" id="customSymptom" placeholder="Add a symptom not listed above..." onkeydown="if(event.key==='Enter')addCustom()" />
+        <button class="btn-add" onclick="addCustom()">+ Add</button>
+      </div>
+      <div class="sel-tags" id="selTags"></div>
+      <div class="row2">
+        <div><label class="field">Age group</label>
+          <select>
+            <option value=""  disabled selected hidden>Select...</option>
+            <option>Child (0–12)</option>
+            <option>Teenager (13–17)</option>
+            <option>Adult (18–40)</option>
+            <option>Middle-aged (41–60)</option>
+            <option>Senior (60+)</option>
+          </select></div>
+        <div><label class="field">Biological sex</label>
+          <select>
+            <option value="" disabled selected hidden>Select...</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div><label class="field">Duration</label>
+          <select>
+            <option value="" disabled selected hidden>Select...</option>
+            <option>Less than a day</option>
+            <option>1–3 days</option>
+            <option>4–7 days</option>
+            <option>1–4 weeks</option>
+            <option>More than a month</option>
+          </select></div>
+        <div><label class="field">Severity</label>
+          <select>
+            <option value="" disabled selected hidden>Select...</option>
+            <option>Mild</option>
+            <option>Moderate</option>
+            <option>Severe</option>
+          </select></div>
+      </div>
+      <button class="btn-diagnose" onclick="runDiagnosis()">Analyze My Symptoms →</button>
+    </div>
+    <div class="loading" id="loader">
+      <div class="spinner"></div>
+      <p style="font-size:15px; font-weight:500; color:var(--b)">Analyzing your symptoms...</p>
+      <p style="font-size:13px; color:var(--g); margin-top:4px">Cross-referencing with medical database</p>
+    </div>
+    <div class="results" id="results">
+      <div class="label2"><div class="num2">2</div>Possible conditions</div>
+      <div id="condList"></div>
+      <div class="card" style="margin-top:2rem">
+        <div class="label2"><div class="num2">3</div>Find a doctor near you</div>
+        <h2>Specialists in your area</h2>
+        <p class="sub">Recommended specialists based on your results.</p>
+        <div class="loc-row">
+          <div class="loc-icon"></div>
+          <input type="text" value="Tunis, Tunisia" />
+          <button class="btn-sm">Update</button>
+        </div>
+        <div class="map-ph">
+          <div class="map-icon"></div>
+          <span>Interactive map — connect Google Maps API to enable</span>
+        </div>
+        <div class="doc-grid" id="docGrid"></div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

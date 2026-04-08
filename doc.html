@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Smart Medic — Find a Doctor</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="doc.css">
+<link rel="stylesheet" href="nav.css">
+<link rel="stylesheet" href="smart.css">
+<script src="doc.js" defer></script>
+</head>
+
+<body>
+   <nav class="navbar">
+  <div class="navdiv">
+    <div class="logo">
+      <a href="smart.html" class="logo-icon">+</a>
+      <a href="smart.html" class="logo-text">Smart Medic</a>
+    </div>
+    <ul>
+      <li><a href="smart.html">Home</a></li>
+      <li><a href="doc.html">Find a Doctor</a></li>
+      <li><a href="about.html">About</a></li>
+    </ul>
+  </div>
+</nav>
+<section class="top">
+  <h1>Find the right <span>doctor</span> for you</h1>
+  <p>Search by name, specialty, or condition and book an appointment near you.</p>
+  <div class="search-bar">
+    <input type="text" id="input" placeholder="Search by name, specialty, or condition..." oninput="filterDoctors()" />
+    <select id="specFilter" onchange="filterDoctors()">
+      <option value="">All specialties</option>
+      <option>General Practitioner</option>
+      <option>Cardiologist</option>
+      <option>Neurologist</option>
+      <option>Pulmonologist</option>
+      <option>Infectious Disease</option>
+      <option>Hematologist</option>
+      <option>Psychiatrist</option>
+      <option>Allergist</option>
+      <option>Nutritionist</option>
+    </select>
+    <button class="btn-search" onclick="filterDoctors()">Search</button>
+  </div>
+</section>
+
+<main class="main">
+  <aside class="sidebar">
+    <div class="filter-card">
+      <h3>Filters</h3>
+
+      <div class="filter-group">
+        <div class="filter-label">Availability</div>
+        <div class="chip-row">
+          <div class="chip active" data-filter="avail" data-val="all"   onclick="setFilter(this,'avail')">Any</div>
+          <div class="chip" data-filter="avail" data-val="today" onclick="setFilter(this,'avail')">Today</div>
+          <div class="chip" data-filter="avail" data-val="week"  onclick="setFilter(this,'avail')">This week</div>
+        </div>
+      </div>
+
+      <div class="filter-divider"></div>
+
+      <div class="filter-group">
+        <div class="filter-label">Distance</div>
+        <input type="range" id="distRange" min="1" max="10" value="10" oninput="updateDist(this)" />
+        <div class="range-labels"><span>1 km</span><span id="distVal">10 km</span></div>
+      </div>
+
+      <div class="filter-divider"></div>
+
+      <div class="filter-group">
+        <div class="filter-label">Min. rating</div>
+        <div class="chip-row">
+          <div class="chip active" data-filter="rating" data-val="0" onclick="setFilter(this,'rating')">Any</div>
+          <div class="chip" data-filter="rating" data-val="3" onclick="setFilter(this,'rating')">3+</div>
+          <div class="chip" data-filter="rating" data-val="4" onclick="setFilter(this,'rating')">4+</div>
+          <div class="chip" data-filter="rating" data-val="5" onclick="setFilter(this,'rating')">5 ★</div>
+        </div>
+      </div>
+
+      <div class="filter-divider"></div>
+
+      <div class="filter-group">
+        <div class="filter-label">Gender</div>
+        <div class="chip-row">
+          <div class="chip active" data-filter="gender" data-val="all"    onclick="setFilter(this,'gender')">Any</div>
+          <div class="chip" data-filter="gender" data-val="male"   onclick="setFilter(this,'gender')">Male</div>
+          <div class="chip" data-filter="gender" data-val="female" onclick="setFilter(this,'gender')">Female</div>
+        </div>
+      </div>
+
+      <div class="filter-divider"></div>
+
+      <div class="filter-group">
+        <div class="filter-label">Options</div>
+        <label class="check-row">
+          <input type="checkbox" id="chkHome" onchange="filterDoctors()" /> Home visits</label>
+        <label class="check-row">
+          <input type="checkbox" id="chkTele" onchange="filterDoctors()" /> Teleconsultation</label>
+        <label class="check-row">
+          <input type="checkbox" id="chkInsur" onchange="filterDoctors()" /> Accepts insurance</label>
+      </div>
+
+      <div class="filter-divider"></div>
+      <button class="btn-clear" onclick="clearFilters()">Clear all filters</button>
+    </div>
+  </aside>
+
+  <div class="results-panel">
+    <div class="results-header">
+      <div>
+        <h2>Doctors near you</h2>
+        <p id="resultCount">Showing all doctors</p>
+      </div>
+      <div class="sort-row">
+        <label>Sort by</label>
+        <select id="sortBy" onchange="filterDoctors()">
+          <option value="dist">Nearest first</option>
+          <option value="rating">Highest rated</option>
+          <option value="avail">Available today</option>
+        </select>
+      </div>
+    </div>
+
+   <div class="map-ph">
+      <div class="map-icon"></div>
+      <span>Interactive map — connect Google Maps API to enable</span>
+    </div>
+
+    <div class="doc-list" id="docList"></div>
+    <div class="no-results" id="noResults" style="display:none">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="#6b7a90" stroke-width="1.5"/><path d="M21 21l-4.35-4.35" stroke="#6b7a90" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <p>No doctors match your filters. Try adjusting your search.</p>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+</main>
+</body>
+</html>
