@@ -1,0 +1,250 @@
+:root {
+  --primary: #1B3F72;
+  --primary-light: #2563a8;
+  --bg: #0f2747;
+
+  --card: #ffffff;
+  --text: #1a2433;
+  --muted: #6b7a90;
+
+  --green: #2ecc71;
+  --red: #e74c3c;
+  --yellow: #f1c40f;
+}
+
+/* RESET */
+* {
+  box-sizing: border-box;
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #1f4a82, var(--bg));
+  color: white;
+}
+
+/* PAGE */
+.dashboard {
+  padding: 40px 20px;
+  max-width: 1100px;
+  margin: auto;
+}
+
+/* TOP SECTION */
+.top {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.top h1 {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+}
+
+.top h1 span {
+  color: #4bc0e0;
+}
+
+.top p {
+  color: rgba(255,255,255,0.7);
+}
+
+/* CARD */
+.card {
+  background: rgba(255,255,255,0.95);
+  color: var(--text);
+  border-radius: 18px;
+  padding: 25px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+
+/* TAGS */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.tag {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  background: white;
+  transition: 0.2s;
+  font-size: 14px;
+}
+
+.tag:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary-light);
+}
+
+.tag.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* INPUT ROW */
+.input-row {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.input-row input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  outline: none;
+}
+
+.input-row button {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* SELECTED TAGS */
+.selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.selected span {
+  background: #eef3ff;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.selected button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* ANALYZE BUTTON */
+.analyze {
+  margin-top: 15px;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--primary-light), var(--primary));
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.analyze:hover {
+  transform: translateY(-2px);
+}
+
+/* LOADER */
+.loader {
+  margin-top: 20px;
+  text-align: center;
+  color: white;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255,255,255,0.2);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  margin: auto;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* RESULTS */
+.results {
+  margin-top: 30px;
+}
+
+.results h2 {
+  margin: 20px 0 10px;
+  color: white;
+}
+
+/* CONDITION CARD */
+.condition {
+  background: white;
+  color: var(--text);
+  padding: 15px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.condition h3 {
+  margin: 0;
+}
+
+.condition p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* TAGS SMALL */
+.tags-small {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tags-small span {
+  font-size: 12px;
+  background: #f0f4ff;
+  padding: 5px 8px;
+  border-radius: 999px;
+}
+
+/* DOCTORS */
+.docs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.doc {
+  background: white;
+  padding: 15px;
+  border-radius: 14px;
+  color: var(--text);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  transition: 0.2s;
+}
+
+.doc:hover {
+  transform: translateY(-3px);
+}
+
+.doc h4 {
+  margin: 0;
+}
+
+.doc p {
+  color: var(--muted);
+  margin: 5px 0;
+}
