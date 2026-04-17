@@ -21,9 +21,9 @@ export default function QuestPage() {
             Get Started
           </button>
 
-          <button className="btn outline">
-            Learn More
-          </button>
+          <button type="button" className="btn outline" onClick={() => navigate("/learn")}>
+  Learn More
+</button>
 
         </div>
 
