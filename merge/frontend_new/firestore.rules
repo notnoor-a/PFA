@@ -1,0 +1,46 @@
+rules_version = '2';
+
+// The backend uses the Firebase Admin SDK which BYPASSES these rules entirely.
+// So these rules are about what the *browser* (your React app) is allowed to
+// do directly against Firestore.
+//
+// In this architecture the browser should NOT write to `diagnoses` — all writes
+// go through the backend. The browser only reads its own diagnoses
+// (the History page could be refactored to read directly from Firestore if you
+// want to skip the /history endpoint — the rules below allow that).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Per-user diagnosis history. Only the owning user may read.
+    // Writes are denied to the browser (backend writes via Admin SDK).
+    match /diagnoses/{docId} {
+      allow read: if request.auth != null
+                  && request.auth.uid == resource.data.uid;
+      allow write: if false;
+    }
+
+    // Example user profile doc — users may read/write only their own.
+    match /users/{uid} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == uid;
+    }
+
+    // Appointments written directly from the browser (Appointments.jsx).
+    //   • create: only if the new doc's patientUid matches the caller
+    //   • read/update/delete: only the owning patient
+    //   • no delete: kept soft via status="cancelled" — hard delete denied
+    match /appointments/{apptId} {
+      allow create: if request.auth != null
+                    && request.resource.data.patientUid == request.auth.uid;
+      allow read, update: if request.auth != null
+                          && resource.data.patientUid == request.auth.uid;
+      allow delete: if false;
+    }
+
+    // Default deny for anything else.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
