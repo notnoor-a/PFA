@@ -1,0 +1,55 @@
+.quest-page {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at top, #1f4a82, #0f2747);
+  color: white;
+  padding: 20px;
+}
+
+.quest-card {
+  text-align: center;
+  max-width: 600px;
+  background: rgba(255,255,255,0.08);
+  padding: 40px;
+  border-radius: 20px;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.quest-card h1 {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+}
+
+.quest-card p {
+  color: rgba(255,255,255,0.75);
+  line-height: 1.6;
+}
+
+.quest-actions {
+  margin-top: 25px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn {
+  padding: 12px 20px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn.primary {
+  background: #2563a8;
+  color: white;
+}
+
+.btn.outline {
+  background: transparent;
+  border: 1px solid white;
+  color: white;
+}
