@@ -1,46 +1,45 @@
 require("dotenv").config();
 
 const path = require("path");
-const { spawn } = require("child_process");
 const fs = require("fs");
 
 const express = require("express");
 const cors = require("cors");
 const admin = require("firebase-admin");
-const Anthropic = require("@anthropic-ai/sdk");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-/* ─────────────────────────────────────────────────────────────
- *  Firebase Admin init
- *  Two ways to provide credentials:
- *    1. GOOGLE_APPLICATION_CREDENTIALS=./firebase-service-account.json
- *    2. FIREBASE_SERVICE_ACCOUNT='{"type":"service_account", ...}'
- * ───────────────────────────────────────────────────────────── */
+function resolveFirebaseCredentials() {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    const svc = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    return {
+      credential: admin.credential.cert(svc),
+      projectId: svc.project_id || process.env.FIREBASE_PROJECT_ID,
+    };
+  }
+
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    const filePath = path.resolve(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`Service account file not found at ${filePath}`);
+    }
+
+    return {
+      credential: admin.credential.cert(require(filePath)),
+      projectId: process.env.FIREBASE_PROJECT_ID,
+    };
+  }
+
+  return {
+    credential: admin.credential.applicationDefault(),
+    projectId: process.env.FIREBASE_PROJECT_ID,
+  };
+}
+
 function initFirebase() {
   if (admin.apps.length) return;
 
   try {
-    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-      const svc = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-      admin.initializeApp({
-        credential: admin.credential.cert(svc),
-        projectId: svc.project_id || process.env.FIREBASE_PROJECT_ID,
-      });
-    } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-      const p = path.resolve(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-      if (!fs.existsSync(p)) {
-        throw new Error(`Service account file not found at ${p}`);
-      }
-      admin.initializeApp({
-        credential: admin.credential.cert(require(p)),
-        projectId: process.env.FIREBASE_PROJECT_ID,
-      });
-    } else {
-      // Fallback: application default creds (e.g. on GCP)
-      admin.initializeApp({
-        credential: admin.credential.applicationDefault(),
-        projectId: process.env.FIREBASE_PROJECT_ID,
-      });
-    }
+    admin.initializeApp(resolveFirebaseCredentials());
     console.log("✅ Firebase Admin initialized");
   } catch (err) {
     console.error("❌ Firebase Admin init failed:", err.message);
@@ -53,34 +52,202 @@ initFirebase();
 
 const db = admin.apps.length ? admin.firestore() : null;
 
-/* ─────────────────────────────────────────────────────────────
- *  Anthropic client
- * ───────────────────────────────────────────────────────────── */
-const anthropicKey = (process.env.ANTHROPIC_API_KEY || "").trim();
-const anthropicConfigured =
-  anthropicKey.startsWith("sk-ant-") &&
-  !anthropicKey.toLowerCase().includes("replace_me");
+const geminiKey = (process.env.GEMINI_API_KEY || "").trim();
+const geminiConfigured =
+  geminiKey.length > 0 && !geminiKey.toLowerCase().includes("replace_me");
+const geminiModelName = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+const groqKey = (process.env.GROQ_API_KEY || "").trim();
+const groqConfigured =
+  groqKey.length > 0 && !groqKey.toLowerCase().includes("replace_me");
+const groqModelName = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
+const groqFallbackModel1 =
+  process.env.GROQ_MODEL_FALLBACK_1 || "meta-llama/llama-4-scout-17b-16e-instruct";
+const groqFallbackModel2 = process.env.GROQ_MODEL_FALLBACK_2 || "qwen/qwen3-32b";
 
-const anthropic = anthropicConfigured
-  ? new Anthropic({ apiKey: anthropicKey })
+const groqModelLadder = [groqModelName, groqFallbackModel1, groqFallbackModel2].filter(
+  (model, idx, arr) => model && arr.indexOf(model) === idx
+);
+
+const geminiClient = geminiConfigured ? new GoogleGenerativeAI(geminiKey) : null;
+const geminiModel = geminiClient
+  ? geminiClient.getGenerativeModel({ model: geminiModelName })
   : null;
 
-if (!anthropicConfigured) {
+if (!geminiConfigured) {
   console.warn(
-    "⚠️  ANTHROPIC_API_KEY not configured — AI analysis will use the local fallback."
+    "⚠️  GEMINI_API_KEY not configured — trying Groq before fallback rules."
+  );
+}
+if (!groqConfigured) {
+  console.warn("⚠️  GROQ_API_KEY not configured — Groq provider disabled.");
+}
+
+function getSymptomFlags(symptomList) {
+  const symptomText = symptomList.join(" ");
+  return {
+    hasChestPain: /chest pain|chest pressure|chest tightness/.test(symptomText),
+    hasCardiacSupport: /dizziness|faint|syncope|nausea|vomiting|sweating|left arm|jaw/.test(
+      symptomText
+    ),
+  };
+}
+
+function buildMedicalPrompt(symptoms) {
+  const system =
+    "You are a conservative medical triage assistant. Return strict JSON only: {conditions:[{name,likelihood,description,specialist}],advice,urgency,disclaimer}. " +
+    "likelihood must be High|Medium|Low. urgency must be Routine|Soon|Urgent. Provide 2-4 conditions, one sentence per description. " +
+    "Use High only when evidence is strong and specific with at least two independent supporting indicators. " +
+    "Never assign High for a severe diagnosis from a single non-specific symptom. " +
+    "For heart attack/myocardial infarction, do not assign High unless chest pain or pressure is present with additional strong supporting signs.";
+
+  const userMsg = `My symptoms: ${symptoms.join(", ")}.`;
+
+  return {
+    system,
+    userPrompt: `${userMsg}\n\nRespond with JSON only.`,
+  };
+}
+
+function parseAndNormalizeDiagnosis(text, symptoms, providerName) {
+  const parsed = parseJsonLoose(text);
+  if (!parsed) {
+    throw new Error(`${providerName} returned invalid JSON`);
+  }
+
+  const safe = normalizeAiResult(parsed, symptoms);
+  if (!safe) {
+    throw new Error(`${providerName} returned unsafe/invalid diagnosis shape`);
+  }
+
+  return safe;
+}
+
+function cleanSymptomsInput(symptoms) {
+  return symptoms
+    .map((s) => String(s || "").trim())
+    .map((s) => s.slice(0, MAX_SYMPTOM_LENGTH))
+    .filter(Boolean)
+    .filter((s, idx, arr) => arr.indexOf(s) === idx)
+    .slice(0, 30);
+}
+
+function isGeminiRateLimitError(err) {
+  const msg = String(err?.message || "").toLowerCase();
+  return err?.status === 429 || /429|too many requests|rate limit|quota/i.test(msg);
+}
+
+function normalizeSymptomsKey(symptoms) {
+  return symptoms
+    .map((s) => String(s || "").trim().toLowerCase())
+    .filter(Boolean)
+    .sort()
+    .join("|");
+}
+
+function getLastRequestAt(uid) {
+  return predictRateStateByUid.get(uid) || 0;
+}
+
+function setLastRequestAt(uid, ts) {
+  predictRateStateByUid.set(uid, ts);
+}
+
+function normalizeAiProvider(value) {
+  const provider = String(value || "").trim().toLowerCase();
+  if (
+    [
+      "gemini",
+      "groq",
+      "groq-primary",
+      "groq-fallback-1",
+      "groq-fallback-2",
+      "fallback",
+      "rules",
+    ].includes(provider)
+  ) {
+    return provider === "rules" ? "fallback" : provider;
+  }
+  return "";
+}
+
+function resolveAiProviderOverride(req) {
+  return (
+    normalizeAiProvider(req.query?.provider) ||
+    normalizeAiProvider(req.body?.provider) ||
+    normalizeAiProvider(process.env.AI_TEST_PROVIDER)
   );
 }
 
-/* ─────────────────────────────────────────────────────────────
- *  Express app
- * ───────────────────────────────────────────────────────────── */
+function fetchWithTimeout(url, options = {}, timeoutMs = AI_PROVIDER_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, {
+    ...options,
+    signal: controller.signal,
+  }).finally(() => clearTimeout(timer));
+}
+
+async function runOpenAiCompatibleProvider({
+  endpoint,
+  apiKey,
+  model,
+  system,
+  user,
+  providerName,
+  extraHeaders = {},
+}) {
+  const response = await fetchWithTimeout(endpoint, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      ...extraHeaders,
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0.2,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: user },
+      ],
+    }),
+  });
+
+  const raw = await response.text();
+  if (!response.ok) {
+    throw new Error(`${providerName} HTTP ${response.status}: ${raw.slice(0, 220)}`);
+  }
+
+  const data = raw ? JSON.parse(raw) : null;
+  const text =
+    data?.choices?.[0]?.message?.content ||
+    data?.choices?.[0]?.text ||
+    "";
+  if (!text) {
+    throw new Error(`${providerName} returned an empty completion`);
+  }
+  return text;
+}
+
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+const MIN_MS_BETWEEN_PREDICT = 2000;
+const PREDICT_CACHE_TTL_MS = 10 * 60 * 1000;
+const MAX_SYMPTOMS_FOR_AI = 10;
+const MAX_SYMPTOM_LENGTH = 48;
+const IP_WINDOW_MS = 60 * 1000;
+const MAX_PREDICT_PER_IP_PER_WINDOW = 45;
+const AI_PROVIDER_TIMEOUT_MS = 8000;
+
+const predictRateStateByUid = new Map();
+const predictResponseCache = new Map();
+const ipPredictWindow = new Map();
 
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 
-/* ─── Auth middleware: verifies Firebase ID token ─── */
 async function requireAuth(req, res, next) {
   if (!admin.apps.length) {
     return res
@@ -99,123 +266,263 @@ async function requireAuth(req, res, next) {
 
   try {
     const decoded = await admin.auth().verifyIdToken(token);
-    req.user = decoded; // { uid, email, ... }
+    req.user = decoded;
     next();
   } catch (err) {
     console.error("Token verify failed:", err.message);
     return res.status(401).json({ error: "Invalid or expired token" });
   }
 }
+async function runAiAnalysis(symptoms, providerOverride = "") {
+  const forcedProvider = normalizeAiProvider(providerOverride);
+  const { system, userPrompt } = buildMedicalPrompt(symptoms);
 
-/* ─────────────────────────────────────────────────────────────
- *  ML model — run the trained Python model in a child process
- *  Returns { disease, confidence, topK } or null on failure
- * ───────────────────────────────────────────────────────────── */
-function runMlModel(symptoms) {
-  return new Promise((resolve) => {
-    const scriptPath = path.join(__dirname, "predict.py");
-    const modelPath = path.join(__dirname, "model.pkl");
+  const runGroqModel = async (model) => {
+    const groqText = await runOpenAiCompatibleProvider({
+      endpoint: "https://api.groq.com/openai/v1/chat/completions",
+      apiKey: groqKey,
+      model,
+      system,
+      user: userPrompt,
+      providerName: "Groq",
+    });
+    const safe = parseAndNormalizeDiagnosis(groqText, symptoms, "Groq");
+    return { aiResult: safe, aiSource: "groq", aiModel: model };
+  };
 
-    if (!fs.existsSync(modelPath)) {
-      // No model trained yet — skip silently
-      return resolve(null);
+  const tryProvider = async (providerName) => {
+    if (providerName === "gemini") {
+      if (!geminiModel) {
+        throw new Error("Gemini is not configured");
+      }
+      const result = await geminiModel.generateContent({
+        contents: [{ role: "user", parts: [{ text: `${system}\n\n${userPrompt}` }] }],
+        generationConfig: { temperature: 0.2 },
+      });
+      const text = result.response?.text?.() || "";
+      const safe = parseAndNormalizeDiagnosis(text, symptoms, "Gemini");
+      return { aiResult: safe, aiSource: "gemini" };
     }
 
-    const py = spawn("python3", [scriptPath, JSON.stringify(symptoms)]);
-
-    let out = "";
-    let err = "";
-    py.stdout.on("data", (d) => (out += d.toString()));
-    py.stderr.on("data", (d) => (err += d.toString()));
-
-    py.on("error", () => resolve(null));
-
-    py.on("close", (code) => {
-      if (code !== 0) {
-        console.error("ML model stderr:", err);
-        return resolve(null);
+    if (providerName === "groq") {
+      if (!groqConfigured) {
+        throw new Error("Groq is not configured");
       }
-      try {
-        resolve(JSON.parse(out.trim()));
-      } catch (_) {
-        console.error("ML model bad output:", out);
-        resolve(null);
+
+      const errors = [];
+      for (const model of groqModelLadder) {
+        try {
+          return await runGroqModel(model);
+        } catch (err) {
+          errors.push(`${model}: ${err.message}`);
+          console.warn(`Groq model failed (${model}), trying next model:`, err.message);
+        }
       }
-    });
-  });
-}
 
-/* ─────────────────────────────────────────────────────────────
- *  AI analysis via Claude
- *  Returns the structured diagnosis the frontend already expects.
- * ───────────────────────────────────────────────────────────── */
-async function runAiAnalysis(symptoms, mlHint) {
-  if (!anthropic) return fallbackDiagnosis(symptoms);
+      throw new Error(`All Groq models failed. ${errors.join(" | ")}`);
+    }
 
-  const hintText = mlHint?.disease
-    ? `\n\nAs a reference, a statistical model trained on a symptom dataset suggests "${mlHint.disease}" (confidence ${(
-        (mlHint.confidence || 0) * 100
-      ).toFixed(0)}%). Use this as one input among others — you may agree or disagree.`
-    : "";
+    if (providerName === "groq-primary") {
+      if (!groqConfigured) {
+        throw new Error("Groq is not configured");
+      }
+      return runGroqModel(groqModelLadder[0]);
+    }
 
-  const system = `You are a medical AI assistant. Given symptoms, provide a helpful, non-alarmist analysis.
-Return ONLY valid JSON (no markdown, no backticks, no prose before or after) with this exact structure:
-{
-  "conditions": [
-    { "name": string, "likelihood": "High"|"Medium"|"Low", "description": string, "specialist": string }
-  ],
-  "advice": string,
-  "urgency": "Routine"|"Soon"|"Urgent",
-  "disclaimer": string
-}
-Provide 2-4 plausible conditions ordered by likelihood. Keep each description to 1 sentence.`;
+    if (providerName === "groq-fallback-1") {
+      if (!groqConfigured) {
+        throw new Error("Groq is not configured");
+      }
+      if (!groqModelLadder[1]) {
+        throw new Error("Groq fallback model #1 is not configured");
+      }
+      return runGroqModel(groqModelLadder[1]);
+    }
 
-  const userMsg = `My symptoms: ${symptoms.join(", ")}.${hintText}`;
+    if (providerName === "groq-fallback-2") {
+      if (!groqConfigured) {
+        throw new Error("Groq is not configured");
+      }
+      if (!groqModelLadder[2]) {
+        throw new Error("Groq fallback model #2 is not configured");
+      }
+      return runGroqModel(groqModelLadder[2]);
+    }
 
-  try {
-    const msg = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
-      max_tokens: 1000,
-      system,
-      messages: [{ role: "user", content: userMsg }],
-    });
+    return { aiResult: fallbackDiagnosis(symptoms), aiSource: "fallback-rules", aiModel: null };
+  };
 
-    const text = msg.content?.[0]?.text || "";
-    return parseJsonLoose(text) || fallbackDiagnosis(symptoms);
-  } catch (err) {
-    console.error("Anthropic error:", err.message);
-    return fallbackDiagnosis(symptoms);
+  if (forcedProvider) {
+    return tryProvider(forcedProvider);
   }
+
+  if (geminiModel) {
+    try {
+      return await tryProvider("gemini");
+    } catch (err) {
+      if (isGeminiRateLimitError(err)) {
+        console.warn("Gemini rate-limited (429). Trying Groq provider.");
+      } else {
+        console.warn("Gemini error, trying Groq provider:", err.message);
+      }
+    }
+  }
+
+  if (groqConfigured) {
+    try {
+      return await tryProvider("groq");
+    } catch (err) {
+      console.warn("Groq error. Using rules fallback:", err.message);
+    }
+  }
+
+  return {
+    aiResult: fallbackDiagnosis(symptoms),
+    aiSource: "fallback-rules",
+    aiModel: null,
+  };
 }
 
 function parseJsonLoose(text) {
+  const raw = String(text || "").trim();
   try {
-    return JSON.parse(text);
+    return JSON.parse(raw);
   } catch (_) {
-    const m = text.match(/\{[\s\S]*\}/);
-    if (m) {
+    const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    if (fenced?.[1]) {
       try {
-        return JSON.parse(m[0]);
+        return JSON.parse(fenced[1]);
+      } catch (_) {}
+    }
+    const start = raw.indexOf("{");
+    const end = raw.lastIndexOf("}");
+    if (start !== -1 && end > start) {
+      try {
+        return JSON.parse(raw.slice(start, end + 1));
       } catch (_) {}
     }
     return null;
   }
 }
 
-/* ─── Offline / no-key fallback ─── */
+function isIpRateLimited(req) {
+  const key = String(req.ip || req.headers["x-forwarded-for"] || "unknown");
+  const now = Date.now();
+  const prev = ipPredictWindow.get(key) || { count: 0, startAt: now };
+  if (now - prev.startAt > IP_WINDOW_MS) {
+    ipPredictWindow.set(key, { count: 1, startAt: now });
+    return false;
+  }
+  const nextCount = prev.count + 1;
+  ipPredictWindow.set(key, { ...prev, count: nextCount });
+  return nextCount > MAX_PREDICT_PER_IP_PER_WINDOW;
+}
+
+function normalizeLikelihood(value) {
+  const v = String(value || "").trim().toLowerCase();
+  if (v === "high") return "High";
+  if (v === "medium") return "Medium";
+  return "Low";
+}
+
+function normalizeUrgency(value) {
+  const v = String(value || "").trim().toLowerCase();
+  if (v === "urgent") return "Urgent";
+  if (v === "soon") return "Soon";
+  return "Routine";
+}
+
+function capLikelihood(current, maxAllowed) {
+  const order = { Low: 1, Medium: 2, High: 3 };
+  const now = normalizeLikelihood(current);
+  const cap = normalizeLikelihood(maxAllowed);
+  return order[now] > order[cap] ? cap : now;
+}
+
+function normalizeAiResult(raw, symptoms) {
+  if (!raw || typeof raw !== "object") return null;
+
+  const symptomList = (Array.isArray(symptoms) ? symptoms : [])
+    .map((s) => String(s || "").trim().toLowerCase())
+    .filter(Boolean);
+  const { hasChestPain, hasCardiacSupport } = getSymptomFlags(symptomList);
+
+  const sourceConditions = Array.isArray(raw.conditions) ? raw.conditions : [];
+  const conditions = sourceConditions
+    .map((c) => {
+      const name = String(c?.name || "").trim();
+      if (!name) return null;
+
+      const nameLower = name.toLowerCase();
+      let likelihood = normalizeLikelihood(c?.likelihood);
+
+      if (symptomList.length <= 1) {
+        likelihood = capLikelihood(likelihood, "Medium");
+      }
+
+      if (/heart attack|myocardial infarction|acute coronary/.test(nameLower)) {
+        if (!hasChestPain || !hasCardiacSupport) {
+          likelihood = capLikelihood(likelihood, "Medium");
+        }
+      }
+
+      return {
+        name,
+        likelihood,
+        description: String(c?.description || "Possible condition based on this symptom pattern.")
+          .trim()
+          .slice(0, 280),
+        specialist: String(c?.specialist || "General Practitioner").trim(),
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 4);
+
+  if (!conditions.length) return null;
+
+  return {
+    conditions,
+    advice: String(
+      raw.advice ||
+        "Track your symptoms over 24-48 hours and seek medical care if they worsen or persist."
+    )
+      .trim()
+      .slice(0, 380),
+    urgency: normalizeUrgency(raw.urgency),
+    disclaimer: String(
+      raw.disclaimer ||
+        "This is an educational estimate, not a medical diagnosis. Consult a licensed clinician for medical decisions."
+    )
+      .trim()
+      .slice(0, 380),
+  };
+}
+
 function fallbackDiagnosis(symptoms) {
   const t = symptoms.join(" ").toLowerCase();
   const conditions = [];
   let urgency = "Routine";
+  const hasChestPain = /chest pain|chest pressure|chest tightness/.test(t);
+  const hasBreathingIssue = /shortness of breath|breathlessness/.test(t);
+  const hasNeuroOrAutonomic = /dizziness|faint|nausea|vomiting|sweating/.test(t);
 
-  if (/chest pain|shortness of breath|dizziness/.test(t)) {
+  if (hasChestPain && (hasBreathingIssue || hasNeuroOrAutonomic)) {
     urgency = "Urgent";
     conditions.push({
-      name: "Cardiorespiratory strain",
+      name: "Possible acute cardiorespiratory issue",
       likelihood: "High",
       description:
-        "These symptoms can indicate breathing or circulation stress and should be evaluated promptly.",
+        "This combination can indicate significant breathing or circulation stress and should be evaluated urgently.",
       specialist: "Cardiologist or Emergency Physician",
+    });
+  } else if (hasBreathingIssue || hasChestPain) {
+    urgency = "Soon";
+    conditions.push({
+      name: "Possible cardiorespiratory cause",
+      likelihood: "Medium",
+      description:
+        "A single chest or breathing symptom can have many causes and needs clinical evaluation if persistent or worsening.",
+      specialist: "General Practitioner",
     });
   }
   if (/fever|cough|sore throat|fatigue/.test(t)) {
@@ -266,15 +573,15 @@ function fallbackDiagnosis(symptoms) {
   };
 }
 
-/* ─────────────────────────────────────────────────────────────
- *  Routes
- * ───────────────────────────────────────────────────────────── */
-
-/* POST /predict
- *   body: { symptoms: string[] }
- *   headers: Authorization: Bearer <firebase id token>
- */
 app.post("/predict", requireAuth, async (req, res) => {
+  if (!db) {
+    return res.status(503).json({ error: "Firestore not configured" });
+  }
+
+  if (isIpRateLimited(req)) {
+    return res.status(429).json({ error: "Too many requests from this IP. Please retry shortly." });
+  }
+
   const symptoms = req.body?.symptoms;
 
   if (!Array.isArray(symptoms) || symptoms.length === 0) {
@@ -283,46 +590,65 @@ app.post("/predict", requireAuth, async (req, res) => {
       .json({ error: "symptoms must be a non-empty array of strings" });
   }
 
-  const cleaned = symptoms
-    .map((s) => String(s || "").trim())
-    .filter(Boolean)
-    .slice(0, 30);
+  const cleaned = cleanSymptomsInput(symptoms);
+
+  if (!cleaned.length) {
+    return res.status(400).json({ error: "No valid symptoms provided" });
+  }
+
+  const now = Date.now();
+  const uid = req.user.uid;
+  if (now - getLastRequestAt(uid) < MIN_MS_BETWEEN_PREDICT) {
+    return res.status(429).json({
+      error: "Please wait a couple of seconds before requesting another analysis.",
+    });
+  }
+  setLastRequestAt(uid, now);
+
+  const cacheKey = `${uid}:${normalizeSymptomsKey(cleaned)}`;
+  const cached = predictResponseCache.get(cacheKey);
+  if (cached && now - cached.cachedAt < PREDICT_CACHE_TTL_MS) {
+    return res.json({
+      ...cached.payload,
+      cached: true,
+    });
+  }
 
   try {
-    // 1) local ML model (best-effort — may be null if model.pkl isn't there)
-    const mlHint = await runMlModel(cleaned);
+    const symptomsForAi = cleaned.slice(0, MAX_SYMPTOMS_FOR_AI);
+    const analysis = await runAiAnalysis(symptomsForAi, resolveAiProviderOverride(req));
+    const aiResult = analysis.aiResult;
+    const aiSource = analysis.aiSource;
+    const aiModel = analysis.aiModel || null;
 
-    // 2) AI analysis (Claude), informed by the ML hint if present
-    const aiResult = await runAiAnalysis(cleaned, mlHint);
-
-    // 3) persist to Firestore
     const entry = {
       uid: req.user.uid,
       symptoms: cleaned,
-      mlHint: mlHint || null,
       aiResult,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     };
 
-    let entryId = null;
-    if (db) {
-      const ref = await db.collection("diagnoses").add(entry);
-      entryId = ref.id;
-    }
-
-    return res.json({
-      id: entryId,
+    const ref = await db.collection("diagnoses").add(entry);
+    const payload = {
+      id: ref.id,
       symptoms: cleaned,
-      mlHint,
       aiResult,
+      aiSource,
+      aiModel,
+    };
+
+    predictResponseCache.set(cacheKey, {
+      cachedAt: Date.now(),
+      payload,
     });
+
+    return res.json(payload);
   } catch (err) {
     console.error("/predict error:", err);
     return res.status(500).json({ error: "Internal server error" });
   }
 });
 
-/* GET /history — user's past analyses, newest first */
 app.get("/history", requireAuth, async (req, res) => {
   if (!db) {
     return res.status(503).json({ error: "Firestore not configured" });
@@ -341,7 +667,6 @@ app.get("/history", requireAuth, async (req, res) => {
       return {
         id: d.id,
         symptoms: data.symptoms,
-        mlHint: data.mlHint,
         aiResult: data.aiResult,
         createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
       };
@@ -353,7 +678,6 @@ app.get("/history", requireAuth, async (req, res) => {
   }
 });
 
-/* DELETE /history/:id */
 app.delete("/history/:id", requireAuth, async (req, res) => {
   if (!db) return res.status(503).json({ error: "Firestore not configured" });
   try {
@@ -370,14 +694,18 @@ app.delete("/history/:id", requireAuth, async (req, res) => {
   }
 });
 
-/* Health check — public */
 app.get("/health", (_req, res) => {
- res.json({
-  status: "ok",
-  firebase: Boolean(admin.apps.length),
-  grok: Boolean(process.env.GROK_API_KEY),
-  mlModel: fs.existsSync(path.join(__dirname, "model.pkl")),
-});
+  res.json({
+    status: "ok",
+    firebase: Boolean(admin.apps.length),
+    gemini: Boolean(geminiClient),
+    geminiModel: geminiModelName,
+    groq: groqConfigured,
+    groqModel: groqModelName,
+    groqModelLadder,
+    providerTimeoutMs: AI_PROVIDER_TIMEOUT_MS,
+    aiTestProvider: normalizeAiProvider(process.env.AI_TEST_PROVIDER) || null,
+  });
 });
 
 app.listen(PORT, () => {

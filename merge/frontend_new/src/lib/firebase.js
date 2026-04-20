@@ -5,13 +5,13 @@ import { getStorage } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDQbd-_Jso8kT0eEFn0JSAlD9Ux6nJXU-Y",
-  authDomain: "pfa-project-3ec22.firebaseapp.com",
-  projectId: "pfa-project-3ec22",
-  storageBucket: "pfa-project-3ec22.firebasestorage.app",
-  messagingSenderId: "843908552605",
-  appId: "1:843908552605:web:d6111f2eba6fe415f0c174",
-  measurementId: "G-FFFZE5W9XT",
+  apiKey: "AIzaSyBaD2nWY-Ez7MwLJkJw1sWflv7ICLFiJmw",
+  authDomain: "pfa-project-8a5b5.firebaseapp.com",
+  projectId: "pfa-project-8a5b5",
+  storageBucket: "pfa-project-8a5b5.firebasestorage.app",
+  messagingSenderId: "531405381373",
+  appId: "1:531405381373:web:7b2ca2d68f574c6b752894",
+  measurementId: "G-RHFKPHMKGC",
 };
 
 const app = initializeApp(firebaseConfig);

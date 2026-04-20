@@ -73,13 +73,14 @@ export async function apiFetch(path, options = {}) {
     finalHeaders["Content-Type"] = "application/json";
   }
 
+  let currentUser = null;
   if (requireAuth) {
-    const user = await waitForAuthUser();
-    if (!user) {
+    currentUser = await waitForAuthUser();
+    if (!currentUser) {
       throw new Error("You must be signed in to perform this action.");
     }
     try {
-      const token = await user.getIdToken();
+      const token = await currentUser.getIdToken();
       finalHeaders.Authorization = `Bearer ${token}`;
     } catch (err) {
       throw new Error(
@@ -88,14 +89,17 @@ export async function apiFetch(path, options = {}) {
     }
   }
 
-  let response;
-  try {
-    response = await fetch(`${API_URL}${path}`, {
+  const sendRequest = (headersOverride = finalHeaders) =>
+    fetch(`${API_URL}${path}`, {
       method,
-      headers: finalHeaders,
+      headers: headersOverride,
       body: body !== undefined && body !== null ? JSON.stringify(body) : undefined,
       signal,
     });
+
+  let response;
+  try {
+    response = await sendRequest(finalHeaders);
   } catch (networkErr) {
     // Thrown on DNS failure, server down, CORS reject, etc.
     throw new Error(
@@ -117,6 +121,32 @@ export async function apiFetch(path, options = {}) {
   }
 
   if (!response.ok) {
+    if (response.status === 401 && requireAuth && currentUser) {
+      try {
+        const refreshedToken = await currentUser.getIdToken(true);
+        const retryHeaders = {
+          ...finalHeaders,
+          Authorization: `Bearer ${refreshedToken}`,
+        };
+        response = await sendRequest(retryHeaders);
+        const retryText = await response.text();
+        if (retryText) {
+          try {
+            data = JSON.parse(retryText);
+          } catch {
+            data = { raw: retryText };
+          }
+        } else {
+          data = null;
+        }
+        if (response.ok) {
+          return data;
+        }
+      } catch {
+        // keep original failure flow below
+      }
+    }
+
     const message =
       data?.error ||
       data?.message ||

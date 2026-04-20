@@ -51,6 +51,24 @@ function inferSpecialties(aiResult, selectedSymptoms) {
   return spec;
 }
 
+function formatAiSource(source) {
+  const raw = String(source || "").toLowerCase();
+  if (raw === "gemini") return "Gemini AI";
+  if (raw === "groq") return "Groq AI";
+  return "Fallback logic";
+}
+
+function formatTestProvider(provider) {
+  const raw = String(provider || "auto").toLowerCase();
+  if (raw === "gemini") return "Gemini";
+  if (raw === "groq") return "Groq";
+  if (raw === "groq-primary") return "Groq primary model";
+  if (raw === "groq-fallback-1") return "Groq fallback model #1";
+  if (raw === "groq-fallback-2") return "Groq fallback model #2";
+  if (raw === "fallback" || raw === "rules") return "Fallback rules";
+  return "Auto";
+}
+
 /* ─── Dashboard ─── */
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -59,7 +77,8 @@ export default function Dashboard() {
   const [custom, setCustom] = useState("");
   const [loading, setLoading] = useState(false);
   const [aiResult, setAiResult] = useState(null);
-  const [mlHint, setMlHint] = useState(null);
+  const [analysisMeta, setAnalysisMeta] = useState(null);
+  const [testProvider, setTestProvider] = useState("auto");
   const [error, setError] = useState("");
   const [nearbyDoctors, setNearbyDoctors] = useState([]);
   const [nearbyLoading, setNearbyLoading] = useState(false);
@@ -110,7 +129,7 @@ export default function Dashboard() {
     setError("");
     setLoading(true);
     setAiResult(null);
-    setMlHint(null);
+    setAnalysisMeta(null);
     setNearbyDoctors([]);
     setNearbyError("");
 
@@ -119,7 +138,10 @@ export default function Dashboard() {
     try {
       const data = await apiFetch("/predict", {
         method: "POST",
-        body: { symptoms },
+        body: {
+          symptoms,
+          provider: testProvider,
+        },
       });
 
       if (!data || !data.aiResult) {
@@ -127,7 +149,12 @@ export default function Dashboard() {
       }
 
       setAiResult(data.aiResult);
-      setMlHint(data.mlHint || null);
+      setAnalysisMeta({
+        aiSource: data.aiSource || "unknown",
+        cached: Boolean(data.cached),
+        throttled: Boolean(data.throttled),
+        message: data.message || "",
+      });
     } catch (err) {
       console.error("/predict failed:", err);
       setError(
@@ -233,6 +260,41 @@ export default function Dashboard() {
             <button onClick={addCustom}>+ Add</button>
           </div>
 
+          <div
+            style={{
+              display: "grid",
+              gap: 6,
+              marginBottom: 14,
+            }}
+          >
+            <label style={{ fontSize: "0.86rem", fontWeight: 600, color: "#4b5b72" }}>
+              Temporary test provider
+            </label>
+            <select
+              value={testProvider}
+              onChange={(e) => setTestProvider(e.target.value)}
+              style={{
+                padding: "10px 12px",
+                borderRadius: 10,
+                border: "1px solid #d8e1ee",
+                background: "#fff",
+                color: "#1a2433",
+                fontSize: "0.92rem",
+              }}
+            >
+              <option value="auto">Auto (Gemini → Groq → fallback)</option>
+              <option value="gemini">Gemini only</option>
+              <option value="groq">Groq only</option>
+              <option value="groq-primary">Groq primary model only</option>
+              <option value="groq-fallback-1">Groq fallback #1 only</option>
+              <option value="groq-fallback-2">Groq fallback #2 only</option>
+              <option value="fallback">Fallback rules only</option>
+            </select>
+            <small style={{ color: "#6f7b8f" }}>
+              Current mode: {formatTestProvider(testProvider)}
+            </small>
+          </div>
+
           {selected.size > 0 && (
             <div className="selected">
               {[...selected].map((s) => (
@@ -284,22 +346,29 @@ export default function Dashboard() {
               </span>
             </div>
 
+            {analysisMeta && (
+              <div
+                className="ai-advice"
+                style={{
+                  marginBottom: 12,
+                  border: "1px solid rgba(52, 152, 219, 0.25)",
+                  background: "rgba(52, 152, 219, 0.08)",
+                }}
+              >
+                <span className="advice-icon">🤖</span>
+                <p>
+                  Source: {formatAiSource(analysisMeta.aiSource)}
+                  {analysisMeta.cached ? " (cached)" : ""}
+                  {analysisMeta.throttled ? " (throttled)" : ""}
+                  {analysisMeta.message ? ` — ${analysisMeta.message}` : ""}
+                </p>
+              </div>
+            )}
+
             {aiResult.advice && (
               <div className="ai-advice">
                 <span className="advice-icon">💬</span>
                 <p>{aiResult.advice}</p>
-              </div>
-            )}
-
-            {mlHint?.disease && (
-              <div className="ai-advice" style={{ marginTop: 8 }}>
-                <span className="advice-icon">🔬</span>
-                <p>
-                  Statistical model hint: <strong>{mlHint.disease}</strong>
-                  {typeof mlHint.confidence === "number" && (
-                    <> ({Math.round(mlHint.confidence * 100)}% confidence)</>
-                  )}
-                </p>
               </div>
             )}
 
