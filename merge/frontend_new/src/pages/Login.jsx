@@ -6,11 +6,35 @@ import { auth } from "../lib/firebase";
 import {
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
+import { ensureUserProfile, loadIsAdminByUid } from "../lib/admin";
 
 const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: "select_account" });
+
+function getGoogleAuthErrorMessage(err) {
+  const code = err?.code || "";
+  if (code === "auth/popup-blocked") {
+    return "Popup blocked by your browser. Redirecting to Google sign-in...";
+  }
+  if (code === "auth/popup-closed-by-user") {
+    return "Google sign-in popup was closed before completing login.";
+  }
+  if (code === "auth/unauthorized-domain") {
+    return "This app domain is not authorized in Firebase Auth settings.";
+  }
+  if (code === "auth/operation-not-allowed") {
+    return "Google sign-in is not enabled in Firebase Authentication.";
+  }
+  if (code === "auth/account-exists-with-different-credential") {
+    return "An account already exists with this email using a different sign-in method.";
+  }
+  return err?.message || "Google login failed";
+}
+
 function GoogleIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 48 48">
@@ -37,7 +61,7 @@ function EyeIcon({ open }) {
       <circle cx="12" cy="12" r="3" />
     </svg>
   ) : (
-    // 🚫 Eye closed (better version)
+    // Eye closed icon variant
     <svg
       width="20"
       height="20"
@@ -95,13 +119,18 @@ export default function AuthSwipe() {
     setLoading(true);
 
     try {
+      let user;
       if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, form.email, form.password);
+        const result = await createUserWithEmailAndPassword(auth, form.email, form.password);
+        user = result.user;
       } else {
-        await signInWithEmailAndPassword(auth, form.email, form.password);
+        const result = await signInWithEmailAndPassword(auth, form.email, form.password);
+        user = result.user;
       }
 
-      navigate("/dashboard");
+      await ensureUserProfile(user || auth.currentUser);
+      const isAdmin = await loadIsAdminByUid((user || auth.currentUser)?.uid);
+      navigate(isAdmin ? "/doctors" : "/dashboard");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -110,12 +139,21 @@ export default function AuthSwipe() {
   };
 
   const handleGoogle = async () => {
+    setError("");
     setGoogleLoading(true);
     try {
-      await signInWithPopup(auth, provider);
-      navigate("/dashboard");
-    } catch {
-      setError("Google login failed");
+      const result = await signInWithPopup(auth, provider);
+      await ensureUserProfile(result.user);
+      const isAdmin = await loadIsAdminByUid(result.user.uid);
+      navigate(isAdmin ? "/doctors" : "/dashboard");
+    } catch (err) {
+      const code = err?.code || "";
+      if (code === "auth/popup-blocked") {
+        setError("Popup blocked by your browser. Redirecting to Google sign-in...");
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+      setError(getGoogleAuthErrorMessage(err));
     } finally {
       setGoogleLoading(false);
     }

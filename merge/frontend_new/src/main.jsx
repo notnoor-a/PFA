@@ -9,6 +9,8 @@ import Dashboard from './pages/Dashboard.jsx'
 import History from './pages/History.jsx'
 import Profile from './pages/Profile.jsx'
 import Appointments from './pages/Appointments.jsx'
+import Doctors from './pages/Doctors.jsx'
+import DoctorRequestsAdmin from './pages/DoctorRequestsAdmin.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -20,6 +22,8 @@ createRoot(document.getElementById('root')).render(
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/appointments" element={<Appointments />} />
+        <Route path="/doctors" element={<Doctors />} />
+        <Route path="/doctor-requests" element={<DoctorRequestsAdmin />} />
         <Route path="/history" element={<History />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

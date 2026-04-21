@@ -4,6 +4,7 @@ import { auth } from "../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import AppNavbar from "../components/AppNavbar";
 import { apiFetch } from "../lib/api";
+import { loadIsAdminByUid } from "../lib/admin";
 import "../styles/dash.css";
 
 const urgencyColor = { Routine: "#2ecc71", Soon: "#f39c12", Urgent: "#e74c3c" };
@@ -35,9 +36,16 @@ export default function History() {
 
   // Auth guard
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
       if (!user) navigate("/login");
-      else setAuthChecked(true);
+      else {
+        const isAdmin = await loadIsAdminByUid(user.uid);
+        if (isAdmin) {
+          navigate("/doctors");
+          return;
+        }
+        setAuthChecked(true);
+      }
     });
     return unsub;
   }, [navigate]);

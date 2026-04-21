@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   signOut,
@@ -9,14 +9,8 @@ import { doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import AppNavbar from "../components/AppNavbar";
 import { auth, db, storage } from "../lib/firebase";
+import { loadIsAdminByUid } from "../lib/admin";
 import "../styles/dash.css";
-
-const DOCTORS = [
-  { id: "dr-haddad", name: "Dr. Yasmine Haddad", specialty: "Cardiology", email: "dr.haddad@smartmedic.example" },
-  { id: "dr-benali", name: "Dr. Karim Benali", specialty: "Dermatology", email: "dr.benali@smartmedic.example" },
-  { id: "dr-rahmani", name: "Dr. Salim Rahmani", specialty: "Neurology", email: "dr.rahmani@smartmedic.example" },
-  { id: "dr-meziane", name: "Dr. Lina Meziane", specialty: "General Medicine", email: "dr.meziane@smartmedic.example" },
-];
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -84,20 +78,22 @@ export default function Profile() {
   const [photoBusy, setPhotoBusy] = useState(false);
   const [profileBusy, setProfileBusy] = useState(false);
   const [passwordBusy, setPasswordBusy] = useState(false);
-  const [savingRatingDoctor, setSavingRatingDoctor] = useState("");
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [ratings, setRatings] = useState({});
-  const [pendingRatings, setPendingRatings] = useState({});
 
   const [uid, setUid] = useState(auth.currentUser?.uid || "");
 
   useEffect(() => {
-    const unsub = auth.onAuthStateChanged((user) => {
+    const unsub = auth.onAuthStateChanged(async (user) => {
       if (!user) {
         navigate("/login");
+        return;
+      }
+      const isAdmin = await loadIsAdminByUid(user.uid);
+      if (isAdmin) {
+        navigate("/doctors");
         return;
       }
       setUid(user.uid);
@@ -116,28 +112,9 @@ export default function Profile() {
         birthDate: data.birthDate || "",
         photoURL: data.photoURL || auth.currentUser?.photoURL || "",
       });
-      const serverRatings = data.doctorRatings || {};
-      setRatings(serverRatings);
-      setPendingRatings((prev) => {
-        const next = { ...prev };
-        Object.keys(next).forEach((doctorId) => {
-          if (Number(serverRatings[doctorId]) === Number(next[doctorId])) {
-            delete next[doctorId];
-          }
-        });
-        return next;
-      });
     });
     return unsub;
   }, [uid]);
-
-  const averageRating = useMemo(() => {
-    const values = Object.values(ratings)
-      .map((v) => Number(v))
-      .filter((v) => Number.isFinite(v) && v > 0);
-    if (!values.length) return 0;
-    return values.reduce((sum, val) => sum + val, 0) / values.length;
-  }, [ratings]);
 
   const saveProfile = async (e) => {
     e.preventDefault();
@@ -242,32 +219,6 @@ export default function Profile() {
     }
   };
 
-  const saveDoctorRating = async (doctorId, value) => {
-    if (!uid) return;
-    setError("");
-    setStatus("");
-    setSavingRatingDoctor(doctorId);
-    setPendingRatings((prev) => ({ ...prev, [doctorId]: value }));
-    setRatings((prev) => ({ ...prev, [doctorId]: value }));
-    try {
-      await setDoc(
-        doc(db, "users", uid),
-        { doctorRatings: { [doctorId]: value }, updatedAt: serverTimestamp() },
-        { merge: true }
-      );
-      setStatus("Doctor rating saved.");
-    } catch (err) {
-      setError(err.message || "Could not save doctor rating.");
-      setPendingRatings((prev) => {
-        const next = { ...prev };
-        delete next[doctorId];
-        return next;
-      });
-    } finally {
-      setSavingRatingDoctor("");
-    }
-  };
-
   const handleLogout = async () => {
     await signOut(auth);
     navigate("/login");
@@ -283,7 +234,7 @@ export default function Profile() {
           <h1>
             Your <span>Profile</span>
           </h1>
-          <p>Manage your account details, security, and doctor feedback.</p>
+          <p>Manage your account details and security settings.</p>
         </section>
 
         {error && <div className="dash-error">{error}</div>}
@@ -369,49 +320,6 @@ export default function Profile() {
                 {passwordBusy ? "Updating..." : "Change password"}
               </button>
             </form>
-          </div>
-        </div>
-
-        <div className="card profile-card doctor-ratings-card">
-          <div className="doctor-rating-header">
-            <h2>Rate doctors</h2>
-            <span className="rating-chip">
-              Avg: {averageRating ? averageRating.toFixed(1) : "0.0"} / 5
-            </span>
-          </div>
-          <div className="doctor-list">
-            {DOCTORS.map((doctor) => (
-              <div key={doctor.id} className="doctor-item">
-                <div>
-                  <h3>{doctor.name}</h3>
-                  <p>{doctor.specialty}</p>
-                </div>
-                <div className="star-row">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      className={`star ${
-                        Number(
-                          (pendingRatings[doctor.id] ??
-                            ratings[doctor.id]) || 0
-                        ) >= star
-                          ? "active"
-                          : ""
-                      }`}
-                      onClick={() => saveDoctorRating(doctor.id, star)}
-                      disabled={savingRatingDoctor === doctor.id}
-                      aria-label={`Rate ${doctor.name} ${star} stars`}
-                    >
-                      ★
-                    </button>
-                  ))}
-                </div>
-                {savingRatingDoctor === doctor.id && (
-                  <small className="rating-saving-label">Saving...</small>
-                )}
-              </div>
-            ))}
           </div>
         </div>
 

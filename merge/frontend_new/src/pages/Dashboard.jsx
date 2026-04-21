@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { collection, onSnapshot } from "firebase/firestore";
 import { auth } from "../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import AppNavbar from "../components/AppNavbar";
 import { apiFetch } from "../lib/api";
+import { db } from "../lib/firebase";
+import { DEFAULT_DOCTORS, normalizeDoctorDoc } from "../lib/doctors";
+import { loadIsAdminByUid } from "../lib/admin";
 import "../styles/dash.css";
 
 /* ─── Symptom list ─── */
@@ -11,15 +15,6 @@ const SYMPTOMS = [
   "Headache", "Fever", "Fatigue", "Cough", "Sore throat", "Nausea",
   "Shortness of breath", "Chest pain", "Back pain", "Dizziness",
   "Rash", "Joint pain", "Vomiting", "Loss of appetite", "Blurred vision",
-];
-
-const DOCTOR_DIRECTORY = [
-  { id: "doc-1", name: "Dr. Salma Benyahia", specialty: "Cardiology", clinic: "El Biar Heart Center", city: "Algiers", lat: 36.7683, lng: 3.0410, phone: "+213 21 55 10 10" },
-  { id: "doc-2", name: "Dr. Mehdi Bouzid", specialty: "General Medicine", clinic: "Hydra Family Clinic", city: "Algiers", lat: 36.7458, lng: 3.0419, phone: "+213 21 60 44 11" },
-  { id: "doc-3", name: "Dr. Ines Hamdi", specialty: "Dermatology", clinic: "Bab Ezzouar Skin Center", city: "Algiers", lat: 36.7197, lng: 3.1836, phone: "+213 21 24 88 67" },
-  { id: "doc-4", name: "Dr. Yacine Mansouri", specialty: "Neurology", clinic: "Constantine NeuroCare", city: "Constantine", lat: 36.3650, lng: 6.6147, phone: "+213 31 91 55 02" },
-  { id: "doc-5", name: "Dr. Farah Kerroum", specialty: "Pulmonology", clinic: "Oran Lung Clinic", city: "Oran", lat: 35.6971, lng: -0.6308, phone: "+213 41 51 27 90" },
-  { id: "doc-6", name: "Dr. Ahmed Ouali", specialty: "Gastroenterology", clinic: "Setif Digestive Center", city: "Setif", lat: 36.1902, lng: 5.4137, phone: "+213 36 72 08 14" },
 ];
 
 function haversineKm(lat1, lon1, lat2, lon2) {
@@ -83,15 +78,45 @@ export default function Dashboard() {
   const [nearbyDoctors, setNearbyDoctors] = useState([]);
   const [nearbyLoading, setNearbyLoading] = useState(false);
   const [nearbyError, setNearbyError] = useState("");
+  const [doctorDirectory, setDoctorDirectory] = useState(DEFAULT_DOCTORS);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Auth guard
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
       if (!user) navigate("/login");
-      else setAuthChecked(true);
+      else {
+        const admin = await loadIsAdminByUid(user.uid);
+        setIsAdmin(admin);
+        if (admin) {
+          navigate("/doctors");
+          return;
+        }
+        setAuthChecked(true);
+      }
     });
     return unsub;
   }, [navigate]);
+
+  useEffect(() => {
+    if (isAdmin) return;
+
+    const unsubscribe = onSnapshot(
+      collection(db, "doctors"),
+      (snapshot) => {
+        const loadedDoctors = snapshot.docs
+          .map(normalizeDoctorDoc)
+          .filter((doctor) => doctor.isActive);
+
+        setDoctorDirectory(loadedDoctors.length > 0 ? loadedDoctors : DEFAULT_DOCTORS);
+      },
+      () => {
+        setDoctorDirectory(DEFAULT_DOCTORS);
+      }
+    );
+
+    return unsubscribe;
+  }, [isAdmin]);
 
   const toggleTag = (s) => {
     setSelected((prev) => {
@@ -185,11 +210,15 @@ export default function Dashboard() {
       (position) => {
         const { latitude, longitude } = position.coords;
         const wantedSpecialties = inferSpecialties(aiResult, [...selected]);
-        const ranked = DOCTOR_DIRECTORY.map((doctor) => ({
-          ...doctor,
-          distanceKm: haversineKm(latitude, longitude, doctor.lat, doctor.lng),
-        }))
+        const ranked = doctorDirectory
           .filter((doctor) => wantedSpecialties.has(doctor.specialty))
+          .map((doctor) => ({
+            ...doctor,
+            distanceKm:
+              Number.isFinite(doctor.lat) && Number.isFinite(doctor.lng)
+                ? haversineKm(latitude, longitude, doctor.lat, doctor.lng)
+                : Number.POSITIVE_INFINITY,
+          }))
           .sort((a, b) => a.distanceKm - b.distanceKm)
           .slice(0, 4);
 
@@ -419,15 +448,25 @@ export default function Dashboard() {
               {nearbyDoctors.length > 0 && (
                 <div className="nearby-grid">
                   {nearbyDoctors.map((doctor) => (
-                    <div key={doctor.id} className="nearby-card">
+                    <button
+                      key={doctor.id}
+                      type="button"
+                      className="nearby-card"
+                      onClick={() => navigate(`/appointments?doctorId=${encodeURIComponent(doctor.id)}`)}
+                    >
                       <h3>{doctor.name}</h3>
                       <p>{doctor.specialty}</p>
                       <span>
                         {doctor.clinic}, {doctor.city}
                       </span>
-                      <small>{doctor.distanceKm.toFixed(1)} km away</small>
+                      <small>
+                        {Number.isFinite(doctor.distanceKm)
+                          ? `${doctor.distanceKm.toFixed(1)} km away`
+                          : "Doctor available"
+                        }
+                      </small>
                       <small>{doctor.phone}</small>
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}

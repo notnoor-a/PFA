@@ -9,7 +9,7 @@ This repository contains:
 - `backend/server.js`: API server (`/predict`, `/history`, `/health`)
 - `backend/firestore.rules`: Firestore security rules (versioned source)
 - `frontend_new/src/`: React application source code
-- `frontend_new/public/`: static public assets
+- `frontend_new/index.html`: Vite app entry HTML
 
 ## Prerequisites
 

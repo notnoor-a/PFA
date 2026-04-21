@@ -216,6 +216,27 @@ body {
   color: var(--primary);
 }
 
+.appointment-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.appointment-card h2,
+.appointment-card > p,
+.appointment-card .auth-form {
+  width: min(100%, 560px);
+}
+
+.appointment-card h2,
+.appointment-card > p {
+  text-align: center;
+}
+
+.appointment-card .auth-form {
+  margin: 0 auto;
+}
+
 /* TAGS */
 .tags {
   display: flex;
@@ -711,6 +732,16 @@ body {
   margin-bottom: 12px;
 }
 
+.dash-warning {
+  background: #fff8e8;
+  border: 1px solid #f0d38a;
+  color: #9a6b00;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+
 .profile-page,
 .appointment-page {
   max-width: 980px;
@@ -962,6 +993,38 @@ body {
   color: #d68910;
 }
 
+.appointment-notification {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.appointment-notification.notification-sending {
+  background: #eef4ff;
+  color: #2f5fa0;
+}
+
+.appointment-notification.notification-pending {
+  background: #f3f6fb;
+  color: #6b7a90;
+}
+
+.appointment-notification.notification-sent {
+  background: #e9f9ef;
+  color: #1e8f53;
+}
+
+.appointment-notification.notification-failed {
+  background: #fdeeee;
+  color: #c0392b;
+}
+
 .history-clear-btn.cancel {
   background: rgba(231, 76, 60, 0.12);
   border-color: rgba(231, 76, 60, 0.25);
@@ -1020,6 +1083,16 @@ body {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.nearby-card:hover {
+  border-color: var(--primary-light);
+  box-shadow: 0 8px 20px rgba(31, 79, 137, 0.12);
 }
 
 .nearby-card h3 {
