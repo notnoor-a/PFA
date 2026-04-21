@@ -922,6 +922,72 @@ body {
   font-size: 0.84rem;
 }
 
+.doctor-location-card {
+  border: 1px solid #dce7f6;
+  border-radius: 14px;
+  padding: 12px;
+  background: linear-gradient(180deg, #f8fbff, #f2f8ff);
+}
+
+.doctor-location-head {
+  margin-bottom: 10px;
+}
+
+.doctor-location-head h3 {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--primary);
+}
+
+.doctor-location-head span {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.doctor-map-wrap {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #cadbf3;
+  background: #eaf2ff;
+}
+
+.doctor-map-wrap iframe {
+  width: 100%;
+  height: 260px;
+  border: 0;
+  display: block;
+}
+
+.map-directions-btn {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #1f4f89;
+  background: #e9f2ff;
+  border: 1px solid #bfd5f3;
+  transition: 0.2s;
+}
+
+.map-directions-btn:hover {
+  background: #dceaff;
+}
+
+.doctor-location-fallback {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #6d7f97;
+  line-height: 1.5;
+}
+
 .my-appointments-card {
   margin-top: 14px;
 }
@@ -1136,6 +1202,7 @@ body {
 @media (max-width: 600px) {
   .profile-grid { grid-template-columns: 1fr; }
   .double-row { grid-template-columns: 1fr; }
+  .doctor-map-wrap iframe { height: 220px; }
   .doctor-item { flex-direction: column; align-items: flex-start; }
   .appointment-item { flex-direction: column; align-items: flex-start; }
   .appointment-actions { flex-wrap: wrap; }

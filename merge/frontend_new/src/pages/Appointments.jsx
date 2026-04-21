@@ -78,6 +78,15 @@ export default function Appointments() {
   }, [preferredDoctorId, isAdmin]);
 
   const selectedDoctor = doctors.find((doctor) => doctor.id === form.doctorId);
+  const doctorLat = Number(selectedDoctor?.lat);
+  const doctorLng = Number(selectedDoctor?.lng);
+  const hasDoctorCoordinates = Number.isFinite(doctorLat) && Number.isFinite(doctorLng);
+  const mapEmbedUrl = hasDoctorCoordinates
+    ? `https://maps.google.com/maps?q=${doctorLat},${doctorLng}&z=15&output=embed`
+    : "";
+  const directionsUrl = hasDoctorCoordinates
+    ? `https://www.google.com/maps/dir/?api=1&destination=${doctorLat},${doctorLng}`
+    : "";
   const currentUser = auth.currentUser;
 
   const requestAppointment = async (e) => {
@@ -204,6 +213,43 @@ export default function Appointments() {
               <p>{selectedDoctor?.name}</p>
               <span>{selectedDoctor?.specialty}</span>
             </div>
+
+            {selectedDoctor && (
+              <div className="doctor-location-card">
+                <div className="doctor-location-head">
+                  <h3>Doctor location</h3>
+                  <span>
+                    {[selectedDoctor.clinic, selectedDoctor.city].filter(Boolean).join(" - ") ||
+                      "Location details unavailable"}
+                  </span>
+                </div>
+
+                {hasDoctorCoordinates ? (
+                  <>
+                    <div className="doctor-map-wrap">
+                      <iframe
+                        title={`Map for ${selectedDoctor.name || "selected doctor"}`}
+                        src={mapEmbedUrl}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                      />
+                    </div>
+                    <a
+                      className="map-directions-btn"
+                      href={directionsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Open Directions In Google Maps
+                    </a>
+                  </>
+                ) : (
+                  <p className="doctor-location-fallback">
+                    Directions are unavailable for this doctor right now because map coordinates are missing.
+                  </p>
+                )}
+              </div>
+            )}
 
             <button className="analyze" type="submit" disabled={loading}>
               {loading ? "Sending..." : "Send appointment request"}

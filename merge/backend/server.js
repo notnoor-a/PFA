@@ -152,32 +152,6 @@ function setLastRequestAt(uid, ts) {
   predictRateStateByUid.set(uid, ts);
 }
 
-function normalizeAiProvider(value) {
-  const provider = String(value || "").trim().toLowerCase();
-  if (
-    [
-      "gemini",
-      "groq",
-      "groq-primary",
-      "groq-fallback-1",
-      "groq-fallback-2",
-      "fallback",
-      "rules",
-    ].includes(provider)
-  ) {
-    return provider === "rules" ? "fallback" : provider;
-  }
-  return "";
-}
-
-function resolveAiProviderOverride(req) {
-  return (
-    normalizeAiProvider(req.query?.provider) ||
-    normalizeAiProvider(req.body?.provider) ||
-    normalizeAiProvider(process.env.AI_TEST_PROVIDER)
-  );
-}
-
 function fetchWithTimeout(url, options = {}, timeoutMs = AI_PROVIDER_TIMEOUT_MS) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -273,8 +247,7 @@ async function requireAuth(req, res, next) {
     return res.status(401).json({ error: "Invalid or expired token" });
   }
 }
-async function runAiAnalysis(symptoms, providerOverride = "") {
-  const forcedProvider = normalizeAiProvider(providerOverride);
+async function runAiAnalysis(symptoms) {
   const { system, userPrompt } = buildMedicalPrompt(symptoms);
 
   const runGroqModel = async (model) => {
@@ -287,7 +260,7 @@ async function runAiAnalysis(symptoms, providerOverride = "") {
       providerName: "Groq",
     });
     const safe = parseAndNormalizeDiagnosis(groqText, symptoms, "Groq");
-    return { aiResult: safe, aiSource: "groq", aiModel: model };
+    return { aiResult: safe };
   };
 
   const tryProvider = async (providerName) => {
@@ -301,7 +274,7 @@ async function runAiAnalysis(symptoms, providerOverride = "") {
       });
       const text = result.response?.text?.() || "";
       const safe = parseAndNormalizeDiagnosis(text, symptoms, "Gemini");
-      return { aiResult: safe, aiSource: "gemini" };
+      return { aiResult: safe };
     }
 
     if (providerName === "groq") {
@@ -322,44 +295,15 @@ async function runAiAnalysis(symptoms, providerOverride = "") {
       throw new Error(`All Groq models failed. ${errors.join(" | ")}`);
     }
 
-    if (providerName === "groq-primary") {
-      if (!groqConfigured) {
-        throw new Error("Groq is not configured");
-      }
-      return runGroqModel(groqModelLadder[0]);
-    }
-
-    if (providerName === "groq-fallback-1") {
-      if (!groqConfigured) {
-        throw new Error("Groq is not configured");
-      }
-      if (!groqModelLadder[1]) {
-        throw new Error("Groq fallback model #1 is not configured");
-      }
-      return runGroqModel(groqModelLadder[1]);
-    }
-
-    if (providerName === "groq-fallback-2") {
-      if (!groqConfigured) {
-        throw new Error("Groq is not configured");
-      }
-      if (!groqModelLadder[2]) {
-        throw new Error("Groq fallback model #2 is not configured");
-      }
-      return runGroqModel(groqModelLadder[2]);
-    }
-
-    return { aiResult: fallbackDiagnosis(symptoms), aiSource: "fallback-rules", aiModel: null };
+    return { aiResult: fallbackDiagnosis(symptoms) };
   };
-
-  if (forcedProvider) {
-    return tryProvider(forcedProvider);
-  }
+  let aiFailed = false;
 
   if (geminiModel) {
     try {
       return await tryProvider("gemini");
     } catch (err) {
+      aiFailed = true;
       if (isGeminiRateLimitError(err)) {
         console.warn("Gemini rate-limited (429). Trying Groq provider.");
       } else {
@@ -372,14 +316,14 @@ async function runAiAnalysis(symptoms, providerOverride = "") {
     try {
       return await tryProvider("groq");
     } catch (err) {
+      aiFailed = true;
       console.warn("Groq error. Using rules fallback:", err.message);
     }
   }
 
   return {
     aiResult: fallbackDiagnosis(symptoms),
-    aiSource: "fallback-rules",
-    aiModel: null,
+    message: aiFailed ? "Couldn't get AI response. Showing rule-based guidance." : "",
   };
 }
 
@@ -616,10 +560,9 @@ app.post("/predict", requireAuth, async (req, res) => {
 
   try {
     const symptomsForAi = cleaned.slice(0, MAX_SYMPTOMS_FOR_AI);
-    const analysis = await runAiAnalysis(symptomsForAi, resolveAiProviderOverride(req));
+    const analysis = await runAiAnalysis(symptomsForAi);
     const aiResult = analysis.aiResult;
-    const aiSource = analysis.aiSource;
-    const aiModel = analysis.aiModel || null;
+    const message = analysis.message || "";
 
     const entry = {
       uid: req.user.uid,
@@ -633,8 +576,7 @@ app.post("/predict", requireAuth, async (req, res) => {
       id: ref.id,
       symptoms: cleaned,
       aiResult,
-      aiSource,
-      aiModel,
+      message,
     };
 
     predictResponseCache.set(cacheKey, {
@@ -704,7 +646,6 @@ app.get("/health", (_req, res) => {
     groqModel: groqModelName,
     groqModelLadder,
     providerTimeoutMs: AI_PROVIDER_TIMEOUT_MS,
-    aiTestProvider: normalizeAiProvider(process.env.AI_TEST_PROVIDER) || null,
   });
 });
 
