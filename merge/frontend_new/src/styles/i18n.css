@@ -1,0 +1,106 @@
+/* ─────────────────────────────────────────────
+   Language Switcher
+   Add this block to your existing index.css
+   ───────────────────────────────────────────── */
+
+.lang-switcher {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.lang-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted, #aaa);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.lang-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary, #fff);
+}
+
+.lang-btn--active {
+  background: var(--accent, #4f8ef7);
+  color: #fff;
+}
+
+.lang-flag {
+  font-size: 0.85rem;
+}
+
+.lang-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+}
+
+/* ─────────────────────────────────────────────
+   RTL Support (Arabic)
+   ───────────────────────────────────────────── */
+
+[dir="rtl"] {
+  font-family: "Segoe UI", Tahoma, "Cairo", "Noto Sans Arabic", sans-serif;
+}
+
+[dir="rtl"] .navbar {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .navbar-links {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .navbar-user {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .navbar-brand {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .lang-switcher {
+  flex-direction: row-reverse;
+}
+
+/* Flip flex containers in cards and forms */
+[dir="rtl"] .dashboard-card,
+[dir="rtl"] .symptom-grid,
+[dir="rtl"] .result-card,
+[dir="rtl"] .doctor-card,
+[dir="rtl"] .history-entry,
+[dir="rtl"] .profile-section,
+[dir="rtl"] .appointment-form {
+  text-align: right;
+}
+
+/* Flip icons that indicate direction */
+[dir="rtl"] .nav-logo {
+  transform: scaleX(-1);
+}
+
+/* Input alignment */
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right;
+  direction: rtl;
+}
+
+/* Button rows */
+[dir="rtl"] .btn-row,
+[dir="rtl"] .action-row {
+  flex-direction: row-reverse;
+}

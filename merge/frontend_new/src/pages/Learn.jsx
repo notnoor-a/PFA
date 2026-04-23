@@ -1,102 +1,53 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import "../styles/learn.css";
-
-const features = [
-  {
-    icon: "⚡",
-    title: "Instant Analysis",
-    desc: "Get AI-powered symptom analysis in seconds, no waiting rooms, no appointments needed.",
-  },
-  {
-    icon: "🧠",
-    title: "Smart AI Engine",
-    desc: "Powered by advanced large language models trained on vast medical knowledge bases.",
-  },
-  {
-    icon: "👨‍⚕️",
-    title: "Specialist Matching",
-    desc: "We match your symptoms to the right type of specialist so you see the right doctor.",
-  },
-  {
-    icon: "🔒",
-    title: "Private & Secure",
-    desc: "Your health data stays private. We never sell or share your personal information.",
-  },
-  {
-    icon: "🌍",
-    title: "Always Available",
-    desc: "Access your health assistant 24/7, from anywhere in the world, on any device.",
-  },
-  {
-    icon: "📋",
-    title: "Detailed Reports",
-    desc: "Receive clear, readable explanations of possible conditions and next steps.",
-  },
-];
-
-const steps = [
-  {
-    num: "01",
-    title: "Select Symptoms",
-    desc: "Choose from common symptoms or type your own in natural language.",
-  },
-  {
-    num: "02",
-    title: "AI Processes",
-    desc: "Our AI analyzes your symptom profile against thousands of conditions.",
-  },
-  {
-    num: "03",
-    title: "Get Results",
-    desc: "Receive a list of possible conditions with likelihood scores.",
-  },
-  {
-    num: "04",
-    title: "Find a Specialist",
-    desc: "We guide you to the right type of doctor for follow-up care.",
-  },
-];
 
 export default function Learn() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const cardsRef = useRef([]);
+
+  const features = [
+    { icon: "⚡", key: "instantAnalysis" },
+    { icon: "🧠", key: "smartAI" },
+    { icon: "👨‍⚕️", key: "specialistMatching" },
+    { icon: "🔒", key: "privateSecure" },
+    { icon: "🌍", key: "alwaysAvailable" },
+    { icon: "📋", key: "detailedReports" },
+  ];
+
+  const steps = [
+    { num: "01", key: "selectSymptoms" },
+    { num: "02", key: "aiAnalyzes" },
+    { num: "03", key: "getResults" },
+  ];
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("visible");
-          }
-        });
+        entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add("visible"); });
       },
       { threshold: 0.1 }
     );
-
-    cardsRef.current.forEach((el) => {
-      if (el) observer.observe(el);
-    });
+    cardsRef.current.forEach((el) => { if (el) observer.observe(el); });
     return () => observer.disconnect();
   }, []);
 
-  const addRef = (el, i) => {
-    cardsRef.current[i] = el;
-  };
+  const addRef = (el, i) => { cardsRef.current[i] = el; };
 
   return (
     <div className="learn-page">
       {/* NAVBAR */}
       <nav className="learn-nav">
         <div className="learn-nav-brand" onClick={() => navigate("/")}>
-          <span>⚕</span> Smart Medic
+          <span>⚕</span> {t("nav.brandName")}
         </div>
-        <div className="learn-nav-links">
-          <button
-            onClick={() => navigate("/login")}
-            className="learn-nav-cta"
-          >
-            Get Started
+        <div className="learn-nav-links" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <LanguageSwitcher />
+          <button onClick={() => navigate("/login")} className="learn-nav-cta">
+            {t("learn.getStarted")}
           </button>
         </div>
       </nav>
@@ -105,27 +56,17 @@ export default function Learn() {
       <section className="learn-hero">
         <div className="learn-hero-badge">AI-Powered Health Assistant</div>
         <h1 className="learn-hero-title">
-          Understand your health
+          {t("learn.heroTitle")}
           <br />
           <span className="learn-gradient-text">before you see a doctor</span>
         </h1>
-        <p className="learn-hero-sub">
-          Smart Medic uses advanced AI to analyze your symptoms instantly,
-          suggest possible conditions, and guide you to the right medical
-          specialist — all in seconds.
-        </p>
+        <p className="learn-hero-sub">{t("learn.heroSubtitle")}</p>
         <div className="learn-hero-actions">
-          <button
-            className="learn-btn-primary"
-            onClick={() => navigate("/login")}
-          >
-            Start for Free →
+          <button className="learn-btn-primary" onClick={() => navigate("/login")}>
+            {t("learn.getStarted")} →
           </button>
-          <button
-            className="learn-btn-ghost"
-            onClick={() => navigate("/dashboard")}
-          >
-            Try Dashboard
+          <button className="learn-btn-ghost" onClick={() => navigate("/dashboard")}>
+            {t("nav.dashboard")}
           </button>
         </div>
 
@@ -150,7 +91,7 @@ export default function Learn() {
       {/* HOW IT WORKS */}
       <section className="learn-section">
         <div className="learn-section-label">Process</div>
-        <h2 className="learn-section-title">How Smart Medic works</h2>
+        <h2 className="learn-section-title">{t("learn.howItWorksTitle")}</h2>
         <div className="learn-steps">
           {steps.map((s, i) => (
             <div
@@ -161,12 +102,10 @@ export default function Learn() {
             >
               <div className="learn-step-num">{s.num}</div>
               <div className="learn-step-content">
-                <h3>{s.title}</h3>
-                <p>{s.desc}</p>
+                <h3>{t(`learn.steps.${s.key}.title`)}</h3>
+                <p>{t(`learn.steps.${s.key}.desc`)}</p>
               </div>
-              {i < steps.length - 1 && (
-                <div className="learn-step-arrow">→</div>
-              )}
+              {i < steps.length - 1 && <div className="learn-step-arrow">→</div>}
             </div>
           ))}
         </div>
@@ -175,7 +114,7 @@ export default function Learn() {
       {/* FEATURES */}
       <section className="learn-section learn-features-section">
         <div className="learn-section-label">Features</div>
-        <h2 className="learn-section-title">Everything you need</h2>
+        <h2 className="learn-section-title">{t("learn.featuresTitle")}</h2>
         <div className="learn-features-grid">
           {features.map((f, i) => (
             <div
@@ -185,8 +124,8 @@ export default function Learn() {
               style={{ animationDelay: `${i * 0.08}s` }}
             >
               <div className="learn-feature-icon">{f.icon}</div>
-              <h3>{f.title}</h3>
-              <p>{f.desc}</p>
+              <h3>{t(`learn.features.${f.key}.title`)}</h3>
+              <p>{t(`learn.features.${f.key}.desc`)}</p>
             </div>
           ))}
         </div>
@@ -213,17 +152,14 @@ export default function Learn() {
       <section className="learn-cta-section">
         <h2>Ready to understand your health?</h2>
         <p>Join Smart Medic today and get instant AI-powered symptom analysis.</p>
-        <button
-          className="learn-btn-primary large"
-          onClick={() => navigate("/login")}
-        >
-          Create Free Account →
+        <button className="learn-btn-primary large" onClick={() => navigate("/login")}>
+          {t("learn.startNow")} →
         </button>
       </section>
 
       {/* FOOTER */}
       <footer className="learn-footer">
-        <span>⚕ Smart Medic</span>
+        <span>⚕ {t("nav.brandName")}</span>
         <span>© {new Date().getFullYear()} — AI Health Assistant</span>
       </footer>
     </div>

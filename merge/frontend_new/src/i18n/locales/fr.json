@@ -1,0 +1,268 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "appointments": "Rendez-vous",
+    "doctors": "Médecins",
+    "history": "Historique",
+    "reviewRequests": "Examiner les demandes",
+    "signOut": "Se déconnecter",
+    "brandName": "Smart Medic"
+  },
+  "login": {
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "fullName": "Nom complet",
+    "signInWithGoogle": "Se connecter avec Google",
+    "continueWithGoogle": "Continuer avec Google",
+    "orContinueWith": "ou continuer avec",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "dontHaveAccount": "Vous n'avez pas de compte ?",
+    "forgotPassword": "Mot de passe oublié ?",
+    "errors": {
+      "popupBlocked": "Popup bloqué par votre navigateur. Redirection vers Google...",
+      "popupClosed": "La fenêtre Google a été fermée avant la connexion.",
+      "unauthorizedDomain": "Ce domaine n'est pas autorisé dans Firebase Auth.",
+      "operationNotAllowed": "La connexion Google n'est pas activée.",
+      "accountExists": "Un compte existe déjà avec cet e-mail via une autre méthode.",
+      "googleFailed": "Connexion Google échouée"
+    }
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "subtitle": "Vérifiez vos symptômes et trouvez le bon médecin",
+    "symptoms": {
+      "title": "Sélectionnez vos symptômes",
+      "subtitle": "Choisissez tous ceux qui s'appliquent",
+      "analyze": "Analyser les symptômes",
+      "analyzing": "Analyse en cours...",
+      "selectAtLeastOne": "Veuillez sélectionner au moins un symptôme.",
+      "list": {
+        "Headache": "Maux de tête",
+        "Fever": "Fièvre",
+        "Fatigue": "Fatigue",
+        "Cough": "Toux",
+        "Sore throat": "Mal de gorge",
+        "Nausea": "Nausée",
+        "Shortness of breath": "Essoufflement",
+        "Chest pain": "Douleur thoracique",
+        "Back pain": "Douleur dorsale",
+        "Dizziness": "Vertiges",
+        "Rash": "Éruption cutanée",
+        "Joint pain": "Douleur articulaire",
+        "Vomiting": "Vomissements",
+        "Loss of appetite": "Perte d'appétit",
+        "Blurred vision": "Vision floue"
+      }
+    },
+    "results": {
+      "title": "Résultats de l'analyse",
+      "possibleConditions": "Conditions possibles",
+      "urgency": "Urgence",
+      "recommendation": "Recommandation",
+      "matchedSpecialists": "Spécialistes recommandés",
+      "urgent": "Urgent",
+      "soon": "Bientôt",
+      "routine": "Routine"
+    },
+    "nearby": {
+      "title": "Médecins à proximité",
+      "findNearby": "Trouver des médecins proches",
+      "finding": "Recherche en cours...",
+      "noLocation": "La géolocalisation n'est pas supportée par votre navigateur.",
+      "locationError": "Impossible de lire votre position. Veuillez réessayer.",
+      "noDoctors": "Aucun médecin à proximité disponible pour le moment.",
+      "bookAppointment": "Prendre rendez-vous",
+      "km": "km"
+    },
+    "errors": {
+      "malformedResponse": "Réponse incorrecte du serveur.",
+      "analysisFailed": "Analyse échouée. Vérifiez que le backend est opérationnel."
+    }
+  },
+  "appointments": {
+    "title": "Prendre un",
+    "titleSpan": "Rendez-vous",
+    "sendRequest": "Envoyer la demande",
+    "sending": "Envoi en cours...",
+    "selectDoctor": "Sélectionner un médecin",
+    "date": "Date",
+    "time": "Heure",
+    "reasonPlaceholder": "Raison de la visite",
+    "selectedDoctor": "Médecin sélectionné",
+    "doctorLocation": "Localisation du médecin",
+    "locationUnavailable": "Localisation non disponible",
+    "errors": {
+      "notSignedIn": "Vous devez être connecté pour demander un rendez-vous.",
+      "completeFields": "Veuillez remplir tous les champs.",
+      "futureDate": "Veuillez choisir une date et une heure futures.",
+      "missingEmailKeys": "Clés EmailJS manquantes.",
+      "sendFailed": "Échec de l'envoi de la demande de rendez-vous."
+    },
+    "success": "Votre demande de rendez-vous a été envoyée avec succès !",
+    "replyNote": "Veuillez répondre directement à cet e-mail pour confirmer l'heure définitive."
+  },
+  "history": {
+    "title": "Votre",
+    "titleSpan": "Historique d'analyse",
+    "subtitle": "Consultez vos anciennes vérifications de symptômes et résultats IA",
+    "loading": "Chargement de votre historique…",
+    "noHistory": "Aucun historique pour l'instant",
+    "noHistoryDesc": "Lancez votre première analyse de symptômes depuis le tableau de bord.",
+    "possibleConditions": "Conditions possibles",
+    "delete": "Supprimer",
+    "confirmDelete": "Supprimer cette entrée ?",
+    "urgent": "Urgent",
+    "soon": "Bientôt",
+    "errors": {
+      "loadFailed": "Impossible de charger l'historique. Vérifiez que le backend est opérationnel.",
+      "deleteFailed": "Impossible de supprimer cette entrée."
+    }
+  },
+  "profile": {
+    "title": "Mon profil",
+    "name": "Nom",
+    "email": "Adresse e-mail",
+    "birthdate": "Date de naissance",
+    "saveChanges": "Enregistrer les modifications",
+    "saving": "Enregistrement...",
+    "uploadPhoto": "Changer la photo",
+    "changePassword": "Changer le mot de passe",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "confirmNewPassword": "Confirmer le nouveau mot de passe",
+    "success": {
+      "profileUpdated": "Profil mis à jour.",
+      "photoUploaded": "Photo de profil mise à jour avec succès.",
+      "passwordChanged": "Mot de passe changé avec succès."
+    },
+    "errors": {
+      "nameShort": "Le nom doit contenir au moins 2 caractères.",
+      "invalidEmail": "Veuillez fournir un e-mail valide.",
+      "ageTooYoung": "Vous devez avoir au moins 13 ans.",
+      "profileFailed": "Impossible de mettre à jour le profil.",
+      "photoFailed": "Impossible de télécharger la photo de profil.",
+      "notImageFile": "Veuillez choisir un fichier image.",
+      "passwordShort": "Le mot de passe doit contenir au moins 6 caractères.",
+      "passwordMismatch": "Le nouveau mot de passe et la confirmation ne correspondent pas.",
+      "passwordFailed": "Impossible de changer le mot de passe.",
+      "canvasUnavailable": "Contexte canvas non disponible.",
+      "imageProcessingFailed": "Échec du traitement de l'image.",
+      "invalidImageFile": "Fichier image invalide.",
+      "couldNotReadFile": "Impossible de lire le fichier image."
+    }
+  },
+  "doctors": {
+    "listTitle": "Liste des",
+    "listTitleSpan": "Médecins",
+    "listSubtitle": "Voici les médecins actuellement disponibles dans l'application.",
+    "activeDoctors": "Médecins actifs",
+    "clinicNotListed": "Clinique non renseignée",
+    "cityNotListed": "Ville non renseignée",
+    "bookAppointment": "Prendre rendez-vous",
+    "requestTitle": "Nos",
+    "requestTitleSpan": "Médecins",
+    "requestJoin": "Demande d'adhésion",
+    "namePlaceholder": "Nom complet",
+    "emailPlaceholder": "E-mail professionnel",
+    "specialtyPlaceholder": "Spécialité",
+    "clinicPlaceholder": "Clinique ou hôpital",
+    "cityPlaceholder": "Ville",
+    "sendRequest": "Envoyer la demande",
+    "errors": {
+      "completeFields": "Veuillez renseigner votre nom, e-mail et spécialité.",
+      "sendFailed": "Échec de l'envoi de la demande."
+    },
+    "requestSaved": "Votre demande a été enregistrée. Un administrateur peut l'examiner et l'approuver."
+  },
+  "doctorRequests": {
+    "title": "Demandes de",
+    "titleSpan": "Médecins",
+    "subtitle": "Examinez les demandes en attente et approuvez-les dans le répertoire des médecins.",
+    "pendingRequests": "Demandes en attente",
+    "noRequests": "Aucune demande de médecin pour l'instant.",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "approved": "Approuvé",
+    "rejected": "Rejeté",
+    "justNow": "À l'instant",
+    "clinicNotListed": "Clinique non renseignée",
+    "errors": {
+      "approveFailed": "Impossible d'approuver la demande.",
+      "rejectFailed": "Impossible de rejeter la demande."
+    }
+  },
+  "learn": {
+    "heroTitle": "Votre assistant santé intelligent",
+    "heroSubtitle": "Analysez vos symptômes, trouvez les bons spécialistes et gérez votre santé — le tout en un seul endroit.",
+    "getStarted": "Commencer",
+    "featuresTitle": "Pourquoi choisir Smart Medic ?",
+    "features": {
+      "instantAnalysis": {
+        "title": "Analyse instantanée",
+        "desc": "Obtenez une analyse de symptômes alimentée par l'IA en quelques secondes, sans salle d'attente."
+      },
+      "smartAI": {
+        "title": "Moteur IA avancé",
+        "desc": "Propulsé par des modèles de langage avancés entraînés sur de vastes bases de connaissances médicales."
+      },
+      "specialistMatching": {
+        "title": "Correspondance de spécialistes",
+        "desc": "Nous associons vos symptômes au bon type de spécialiste pour que vous consultiez le bon médecin."
+      },
+      "privateSecure": {
+        "title": "Privé & Sécurisé",
+        "desc": "Vos données de santé restent privées. Nous ne vendons ni ne partageons jamais vos informations."
+      },
+      "alwaysAvailable": {
+        "title": "Toujours disponible",
+        "desc": "Accédez à votre assistant santé 24h/24 et 7j/7, de partout dans le monde, sur n'importe quel appareil."
+      },
+      "detailedReports": {
+        "title": "Rapports détaillés",
+        "desc": "Recevez des explications claires et lisibles sur les conditions possibles et les prochaines étapes."
+      }
+    },
+    "howItWorksTitle": "Comment ça fonctionne",
+    "steps": {
+      "selectSymptoms": {
+        "title": "Sélectionner les symptômes",
+        "desc": "Choisissez parmi les symptômes courants ou saisissez les vôtres en langage naturel."
+      },
+      "aiAnalyzes": {
+        "title": "L'IA analyse",
+        "desc": "Notre IA analyse votre profil de symptômes par rapport à des milliers de conditions."
+      },
+      "getResults": {
+        "title": "Obtenir les résultats",
+        "desc": "Recevez des résultats clairs avec les spécialistes recommandés et les prochaines étapes."
+      }
+    },
+    "startNow": "Commencer maintenant"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "retry": "Réessayer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "next": "Suivant",
+    "submit": "Soumettre",
+    "close": "Fermer",
+    "search": "Rechercher",
+    "noData": "Aucune donnée disponible",
+    "specialty": "Spécialité",
+    "generalMedicine": "Médecine générale"
+  },
+  "lang": {
+    "select": "Langue",
+    "en": "English",
+    "fr": "Français",
+    "ar": "العربية"
+  }
+}

@@ -6,11 +6,13 @@ import AppNavbar from "../components/AppNavbar";
 import { auth, db } from "../lib/firebase";
 import { DEFAULT_DOCTORS, normalizeDoctorDoc } from "../lib/doctors";
 import { loadIsAdminByUid } from "../lib/admin";
+import { useTranslation } from "react-i18next";
 import "../styles/dash.css";
 
 export default function Appointments() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const preferredDoctorId = new URLSearchParams(location.search).get("doctorId") || "";
   const [authChecked, setAuthChecked] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -31,7 +33,6 @@ export default function Appointments() {
         navigate("/login");
         return;
       }
-
       const admin = await loadIsAdminByUid(user.uid);
       setIsAdmin(admin);
       if (admin) {
@@ -40,40 +41,31 @@ export default function Appointments() {
       }
       setAuthChecked(true);
     });
-
     return unsubscribe;
   }, [navigate]);
 
   useEffect(() => {
     if (isAdmin) return;
-
     const doctorsRef = collection(db, "doctors");
-
     const unsubscribe = onSnapshot(
       doctorsRef,
       (snapshot) => {
         const loadedDoctors = snapshot.docs
           .map(normalizeDoctorDoc)
           .filter((doctor) => doctor.isActive);
-
         const availableDoctors = loadedDoctors.length > 0 ? loadedDoctors : DEFAULT_DOCTORS;
         setDoctors(availableDoctors);
-
         setForm((current) => {
           const desiredDoctorId = current.doctorId || preferredDoctorId;
           const selectionStillExists = availableDoctors.some((doctor) => doctor.id === desiredDoctorId);
-
           return {
             ...current,
             doctorId: selectionStillExists ? desiredDoctorId : (availableDoctors[0]?.id || ""),
           };
         });
       },
-      () => {
-        setDoctors(DEFAULT_DOCTORS);
-      }
+      () => { setDoctors(DEFAULT_DOCTORS); }
     );
-
     return unsubscribe;
   }, [preferredDoctorId, isAdmin]);
 
@@ -95,18 +87,16 @@ export default function Appointments() {
     setBanner({ kind: "", message: "" });
 
     if (!currentUser) {
-      setError("You must be signed in to request an appointment.");
+      setError(t("appointments.errors.notSignedIn"));
       return;
     }
-
     if (!form.date || !form.time || !form.reason.trim()) {
-      setError("Please complete all fields.");
+      setError(t("appointments.errors.completeFields"));
       return;
     }
-
     const selectedDateTime = new Date(`${form.date}T${form.time}`);
     if (Number.isNaN(selectedDateTime.getTime()) || selectedDateTime < new Date()) {
-      setError("Please choose a future appointment date and time.");
+      setError(t("appointments.errors.futureDate"));
       return;
     }
 
@@ -115,9 +105,7 @@ export default function Appointments() {
     const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
     if (!serviceId || !templateId || !publicKey) {
-      setError(
-        "Missing EmailJS environment keys (VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, VITE_EMAILJS_PUBLIC_KEY)."
-      );
+      setError(t("appointments.errors.missingEmailKeys"));
       return;
     }
 
@@ -134,20 +122,19 @@ export default function Appointments() {
           appointment_date: form.date,
           appointment_time: form.time,
           reason: form.reason.trim(),
-          specialty: selectedDoctor?.specialty || "General Medicine",
-          reply_instruction:
-            "Please reply directly to this email to agree on the final appointment time.",
+          specialty: selectedDoctor?.specialty || t("common.generalMedicine"),
+          reply_instruction: t("appointments.replyNote"),
         },
         { publicKey }
       );
 
       setBanner({
         kind: "success",
-        message: `Request sent to ${selectedDoctor?.name || "the doctor"}. They can reply to confirm the appointment.`,
+        message: t("appointments.success"),
       });
       setForm((prev) => ({ ...prev, date: "", time: "", reason: "" }));
     } catch (err) {
-      setError(err.message || "Failed to send appointment request.");
+      setError(err.message || t("appointments.errors.sendFailed"));
     } finally {
       setLoading(false);
     }
@@ -161,7 +148,7 @@ export default function Appointments() {
       <div className="dashboard appointment-page">
         <section className="top">
           <h1>
-            Request an <span>Appointment</span>
+            {t("appointments.title")} <span>{t("appointments.titleSpan")}</span>
           </h1>
           <p>
             This page only starts the conversation. We send the request by email,
@@ -173,7 +160,7 @@ export default function Appointments() {
         {banner.message && <div className={`dash-${banner.kind}`}>{banner.message}</div>}
 
         <div className="card appointment-card">
-          <h2>Send request</h2>
+          <h2>{t("appointments.sendRequest")}</h2>
           <form className="auth-form" onSubmit={requestAppointment}>
             <select
               className="styled-select"
@@ -203,13 +190,13 @@ export default function Appointments() {
             <textarea
               className="styled-textarea"
               rows={5}
-              placeholder="Reason for visit"
+              placeholder={t("appointments.reasonPlaceholder")}
               value={form.reason}
               onChange={(e) => setForm((p) => ({ ...p, reason: e.target.value }))}
             />
 
             <div className="doctor-preview">
-              <h3>Selected doctor</h3>
+              <h3>{t("appointments.selectedDoctor")}</h3>
               <p>{selectedDoctor?.name}</p>
               <span>{selectedDoctor?.specialty}</span>
             </div>
@@ -217,10 +204,10 @@ export default function Appointments() {
             {selectedDoctor && (
               <div className="doctor-location-card">
                 <div className="doctor-location-head">
-                  <h3>Doctor location</h3>
+                  <h3>{t("appointments.doctorLocation")}</h3>
                   <span>
                     {[selectedDoctor.clinic, selectedDoctor.city].filter(Boolean).join(" - ") ||
-                      "Location details unavailable"}
+                      t("appointments.locationUnavailable")}
                   </span>
                 </div>
 
@@ -252,7 +239,7 @@ export default function Appointments() {
             )}
 
             <button className="analyze" type="submit" disabled={loading}>
-              {loading ? "Sending..." : "Send appointment request"}
+              {loading ? t("common.loading") : t("appointments.sendRequest")}
             </button>
           </form>
         </div>

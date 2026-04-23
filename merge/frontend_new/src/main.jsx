@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import './i18n/i18n.js'          // ← initialise i18next before any component renders
 import './styles/index.css'
 import QuestPage from './pages/Quest.jsx'
 import Learn from './pages/Learn.jsx'

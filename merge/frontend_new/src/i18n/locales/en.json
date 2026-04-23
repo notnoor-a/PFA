@@ -1,0 +1,268 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "appointments": "Appointments",
+    "doctors": "Doctors",
+    "history": "History",
+    "reviewRequests": "Review Requests",
+    "signOut": "Sign out",
+    "brandName": "Smart Medic"
+  },
+  "login": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "email": "Email address",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "fullName": "Full name",
+    "signInWithGoogle": "Sign in with Google",
+    "continueWithGoogle": "Continue with Google",
+    "orContinueWith": "or continue with",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "forgotPassword": "Forgot password?",
+    "errors": {
+      "popupBlocked": "Popup blocked by your browser. Redirecting to Google sign-in...",
+      "popupClosed": "Google sign-in popup was closed before completing login.",
+      "unauthorizedDomain": "This app domain is not authorized in Firebase Auth settings.",
+      "operationNotAllowed": "Google sign-in is not enabled in Firebase Authentication.",
+      "accountExists": "An account already exists with this email using a different sign-in method.",
+      "googleFailed": "Google login failed"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Check your symptoms and find the right doctor",
+    "symptoms": {
+      "title": "Select your symptoms",
+      "subtitle": "Choose all that apply",
+      "analyze": "Analyze Symptoms",
+      "analyzing": "Analyzing...",
+      "selectAtLeastOne": "Please select at least one symptom.",
+      "list": {
+        "Headache": "Headache",
+        "Fever": "Fever",
+        "Fatigue": "Fatigue",
+        "Cough": "Cough",
+        "Sore throat": "Sore throat",
+        "Nausea": "Nausea",
+        "Shortness of breath": "Shortness of breath",
+        "Chest pain": "Chest pain",
+        "Back pain": "Back pain",
+        "Dizziness": "Dizziness",
+        "Rash": "Rash",
+        "Joint pain": "Joint pain",
+        "Vomiting": "Vomiting",
+        "Loss of appetite": "Loss of appetite",
+        "Blurred vision": "Blurred vision"
+      }
+    },
+    "results": {
+      "title": "Analysis Results",
+      "possibleConditions": "Possible Conditions",
+      "urgency": "Urgency",
+      "recommendation": "Recommendation",
+      "matchedSpecialists": "Matched Specialists",
+      "urgent": "Urgent",
+      "soon": "Soon",
+      "routine": "Routine"
+    },
+    "nearby": {
+      "title": "Nearby Doctors",
+      "findNearby": "Find Nearby Doctors",
+      "finding": "Finding...",
+      "noLocation": "Geolocation is not supported by your browser.",
+      "locationError": "Could not read your current location accurately. Please try again.",
+      "noDoctors": "No nearby doctors with location coordinates are available yet.",
+      "bookAppointment": "Book Appointment",
+      "km": "km"
+    },
+    "errors": {
+      "malformedResponse": "Malformed response from server.",
+      "analysisFailed": "Analysis failed. Please check the backend is running and try again."
+    }
+  },
+  "appointments": {
+    "title": "Request an",
+    "titleSpan": "Appointment",
+    "sendRequest": "Send Request",
+    "sending": "Sending...",
+    "selectDoctor": "Select a doctor",
+    "date": "Date",
+    "time": "Time",
+    "reasonPlaceholder": "Reason for visit",
+    "selectedDoctor": "Selected doctor",
+    "doctorLocation": "Doctor location",
+    "locationUnavailable": "Location details unavailable",
+    "errors": {
+      "notSignedIn": "You must be signed in to request an appointment.",
+      "completeFields": "Please complete all fields.",
+      "futureDate": "Please choose a future appointment date and time.",
+      "missingEmailKeys": "Missing EmailJS environment keys.",
+      "sendFailed": "Failed to send appointment request."
+    },
+    "success": "Your appointment request was sent successfully!",
+    "replyNote": "Please reply directly to this email to agree on the final appointment time."
+  },
+  "history": {
+    "title": "Your",
+    "titleSpan": "Analysis History",
+    "subtitle": "Review your past symptom checks and AI results",
+    "loading": "Loading your history…",
+    "noHistory": "No history yet",
+    "noHistoryDesc": "Run your first symptom analysis from the Dashboard.",
+    "possibleConditions": "Possible Conditions",
+    "delete": "Delete",
+    "confirmDelete": "Delete this entry?",
+    "urgent": "Urgent",
+    "soon": "Soon",
+    "errors": {
+      "loadFailed": "Could not load history. Please check the backend is running.",
+      "deleteFailed": "Could not delete this entry."
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "name": "Name",
+    "email": "Email address",
+    "birthdate": "Birthdate",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "uploadPhoto": "Change Photo",
+    "changePassword": "Change Password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "success": {
+      "profileUpdated": "Profile details updated.",
+      "photoUploaded": "Profile picture uploaded successfully.",
+      "passwordChanged": "Password changed successfully."
+    },
+    "errors": {
+      "nameShort": "Name must be at least 2 characters.",
+      "invalidEmail": "Please provide a valid email.",
+      "ageTooYoung": "You must be at least 13 years old.",
+      "profileFailed": "Could not update profile.",
+      "photoFailed": "Could not upload profile picture.",
+      "notImageFile": "Please choose an image file.",
+      "passwordShort": "Password must contain at least 6 characters.",
+      "passwordMismatch": "New password and confirmation do not match.",
+      "passwordFailed": "Could not change password.",
+      "canvasUnavailable": "Canvas context unavailable.",
+      "imageProcessingFailed": "Image processing failed.",
+      "invalidImageFile": "Invalid image file.",
+      "couldNotReadFile": "Could not read image file."
+    }
+  },
+  "doctors": {
+    "listTitle": "Doctors",
+    "listTitleSpan": "List",
+    "listSubtitle": "These are the doctors currently available in the app.",
+    "activeDoctors": "Active doctors",
+    "clinicNotListed": "Clinic not listed",
+    "cityNotListed": "City not listed",
+    "bookAppointment": "Book Appointment",
+    "requestTitle": "Our",
+    "requestTitleSpan": "Doctors",
+    "requestJoin": "Request to join",
+    "namePlaceholder": "Full name",
+    "emailPlaceholder": "Professional email",
+    "specialtyPlaceholder": "Specialty",
+    "clinicPlaceholder": "Clinic or hospital",
+    "cityPlaceholder": "City",
+    "sendRequest": "Send Request",
+    "errors": {
+      "completeFields": "Please complete your name, email, and specialty.",
+      "sendFailed": "Failed to send request."
+    },
+    "requestSaved": "Your request has been saved. An admin can review it and approve it from the requests page."
+  },
+  "doctorRequests": {
+    "title": "Doctor",
+    "titleSpan": "Requests",
+    "subtitle": "Review pending doctor requests and approve them into the live doctors directory.",
+    "pendingRequests": "Pending requests",
+    "noRequests": "No doctor requests yet.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "justNow": "Just now",
+    "clinicNotListed": "Clinic not listed",
+    "errors": {
+      "approveFailed": "Could not approve request.",
+      "rejectFailed": "Could not reject request."
+    }
+  },
+  "learn": {
+    "heroTitle": "Your Smart Health Assistant",
+    "heroSubtitle": "Analyze symptoms, find the right specialists, and manage your health — all in one place.",
+    "getStarted": "Get Started",
+    "featuresTitle": "Why Choose Smart Medic?",
+    "features": {
+      "instantAnalysis": {
+        "title": "Instant Analysis",
+        "desc": "Get AI-powered symptom analysis in seconds, no waiting rooms, no appointments needed."
+      },
+      "smartAI": {
+        "title": "Smart AI Engine",
+        "desc": "Powered by advanced large language models trained on vast medical knowledge bases."
+      },
+      "specialistMatching": {
+        "title": "Specialist Matching",
+        "desc": "We match your symptoms to the right type of specialist so you see the right doctor."
+      },
+      "privateSecure": {
+        "title": "Private & Secure",
+        "desc": "Your health data stays private. We never sell or share your personal information."
+      },
+      "alwaysAvailable": {
+        "title": "Always Available",
+        "desc": "Access your health assistant 24/7, from anywhere in the world, on any device."
+      },
+      "detailedReports": {
+        "title": "Detailed Reports",
+        "desc": "Receive clear, readable explanations of possible conditions and next steps."
+      }
+    },
+    "howItWorksTitle": "How It Works",
+    "steps": {
+      "selectSymptoms": {
+        "title": "Select Symptoms",
+        "desc": "Choose from common symptoms or type your own in natural language."
+      },
+      "aiAnalyzes": {
+        "title": "AI Analyzes",
+        "desc": "Our AI analyzes your symptom profile against thousands of conditions."
+      },
+      "getResults": {
+        "title": "Get Results",
+        "desc": "Receive clear results with recommended specialists and next steps."
+      }
+    },
+    "startNow": "Start Now"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "close": "Close",
+    "search": "Search",
+    "noData": "No data available",
+    "specialty": "Specialty",
+    "generalMedicine": "General Medicine"
+  },
+  "lang": {
+    "select": "Language",
+    "en": "English",
+    "fr": "Français",
+    "ar": "العربية"
+  }
+}

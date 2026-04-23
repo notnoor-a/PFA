@@ -4,12 +4,15 @@ import { auth, db } from "../lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
 import { loadIsAdminByUid } from "../lib/admin";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function AppNavbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const [user, setUser] = useState(auth.currentUser);
-  const [adminUser, setAdminUser] = useState(null); // null = loading, true/false = determined
+  const [adminUser, setAdminUser] = useState(null);
   const [userProfile, setUserProfile] = useState({ photoURL: "" });
 
   useEffect(() => {
@@ -38,7 +41,6 @@ export default function AppNavbar() {
 
   const isActive = (path) => (location.pathname === path ? "active" : "");
 
-  // Don't render navbar content until admin status is determined
   if (adminUser === null) {
     return <nav className="navbar"><div className="navbar-brand" /></nav>;
   }
@@ -47,7 +49,7 @@ export default function AppNavbar() {
     <nav className="navbar">
       <div className="navbar-brand" onClick={() => navigate(adminUser ? "/doctors" : "/dashboard")}>
         <span className="nav-logo">⚕</span>
-        <span>Smart Medic</span>
+        <span>{t("nav.brandName")}</span>
       </div>
 
       <div className="navbar-links">
@@ -57,13 +59,13 @@ export default function AppNavbar() {
               className={`nav-link ${isActive("/doctors")}`}
               onClick={() => navigate("/doctors")}
             >
-              Doctors
+              {t("nav.doctors")}
             </button>
             <button
               className={`nav-link ${isActive("/doctor-requests")}`}
               onClick={() => navigate("/doctor-requests")}
             >
-              Review Requests
+              {t("nav.reviewRequests")}
             </button>
           </>
         ) : (
@@ -72,42 +74,43 @@ export default function AppNavbar() {
               className={`nav-link ${isActive("/dashboard")}`}
               onClick={() => navigate("/dashboard")}
             >
-              Dashboard
+              {t("nav.dashboard")}
             </button>
             <button
               className={`nav-link ${isActive("/appointments")}`}
               onClick={() => navigate("/appointments")}
             >
-              Appointments
+              {t("nav.appointments")}
             </button>
             {user && (
               <button
                 className={`nav-link ${isActive("/doctors")}`}
                 onClick={() => navigate("/doctors")}
               >
-                Doctors
+                {t("nav.doctors")}
               </button>
             )}
             <button
               className={`nav-link ${isActive("/history")}`}
               onClick={() => navigate("/history")}
             >
-              History
+              {t("nav.history")}
             </button>
           </>
         )}
       </div>
 
       <div className="navbar-user">
+        <LanguageSwitcher />
         {adminUser ? (
           <button className="nav-logout" onClick={() => signOut(auth).then(() => navigate("/login"))}>
-            Sign out
+            {t("nav.signOut")}
           </button>
         ) : (
           <div
             className="nav-avatar"
             onClick={() => navigate("/profile")}
-            title="Open profile"
+            title={t("nav.profile")}
           >
             {userProfile?.photoURL ? (
               <img
@@ -126,3 +129,4 @@ export default function AppNavbar() {
     </nav>
   );
 }
+

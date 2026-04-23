@@ -648,6 +648,17 @@ app.get("/health", (_req, res) => {
     providerTimeoutMs: AI_PROVIDER_TIMEOUT_MS,
   });
 });
+// Liste statique de symptômes (tu peux l'enrichir)
+const DEFAULT_SYMPTOMS = [
+  "Headache", "Fever", "Fatigue", "Cough", "Sore throat",
+  "Nausea", "Shortness of breath", "Chest pain", "Back pain",
+  "Dizziness", "Rash", "Joint pain", "Vomiting", "Loss of appetite",
+  "Blurred vision"
+];
+
+app.get("/api/symptoms", (req, res) => {
+  res.json({ symptoms: DEFAULT_SYMPTOMS });
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

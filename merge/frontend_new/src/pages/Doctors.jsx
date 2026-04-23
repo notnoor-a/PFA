@@ -6,19 +6,14 @@ import { auth, db } from "../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { loadIsAdminByUid } from "../lib/admin";
 import { DEFAULT_DOCTORS, normalizeDoctorDoc } from "../lib/doctors";
+import { useTranslation } from "react-i18next";
 import "../styles/dash.css";
 
-const INITIAL_FORM = {
-  name: "",
-  email: "",
-  specialty: "",
-  clinic: "",
-  city: "",
-  message: "",
-};
+const INITIAL_FORM = { name: "", email: "", specialty: "", clinic: "", city: "", message: "" };
 
 export default function Doctors() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [form, setForm] = useState(INITIAL_FORM);
   const [status, setStatus] = useState({ kind: "", message: "" });
   const [sending, setSending] = useState(false);
@@ -28,44 +23,31 @@ export default function Doctors() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (!currentUser) {
-        navigate("/login");
-        return;
-      }
-
+      if (!currentUser) { navigate("/login"); return; }
       const isAdmin = await loadIsAdminByUid(currentUser.uid);
       setAdminUser(isAdmin);
       setAuthChecked(true);
     });
-
     return unsubscribe;
   }, [navigate]);
 
   useEffect(() => {
     if (!adminUser) return;
-
     const unsubscribe = onSnapshot(collection(db, "doctors"), (snapshot) => {
-      const loadedDoctors = snapshot.docs
-        .map(normalizeDoctorDoc)
-        .filter((doctor) => doctor.isActive);
-
+      const loadedDoctors = snapshot.docs.map(normalizeDoctorDoc).filter((d) => d.isActive);
       setDoctorDirectory(loadedDoctors.length > 0 ? loadedDoctors : DEFAULT_DOCTORS);
     });
-
     return unsubscribe;
   }, [adminUser]);
 
   const submitRequest = async (event) => {
     event.preventDefault();
     setStatus({ kind: "", message: "" });
-
     if (!form.name.trim() || !form.email.trim() || !form.specialty.trim()) {
-      setStatus({ kind: "error", message: "Please complete your name, email, and specialty." });
+      setStatus({ kind: "error", message: t("doctors.errors.completeFields") });
       return;
     }
-
     setSending(true);
-
     try {
       await addDoc(collection(db, "doctorRequests"), {
         name: form.name.trim(),
@@ -80,14 +62,10 @@ export default function Doctors() {
         reviewedAt: null,
         reviewedByUid: null,
       });
-
-      setStatus({
-        kind: "success",
-        message: "Your request has been saved. An admin can review it and approve it from the requests page.",
-      });
+      setStatus({ kind: "success", message: t("doctors.requestSaved") });
       setForm(INITIAL_FORM);
     } catch (err) {
-      setStatus({ kind: "error", message: err.message || "Failed to send request." });
+      setStatus({ kind: "error", message: err.message || t("doctors.errors.sendFailed") });
     } finally {
       setSending(false);
     }
@@ -102,13 +80,13 @@ export default function Doctors() {
         <div className="dashboard doctors-page">
           <section className="top">
             <h1>
-              Doctors <span>List</span>
+              {t("doctors.listTitle")} <span>{t("doctors.listTitleSpan")}</span>
             </h1>
-            <p>These are the doctors currently available in the app.</p>
+            <p>{t("doctors.listSubtitle")}</p>
           </section>
 
           <section className="card">
-            <h2>Active doctors</h2>
+            <h2>{t("doctors.activeDoctors")}</h2>
             <div className="doctor-list">
               {doctorDirectory.map((doctor) => (
                 <div className="doctor-item" key={doctor.id}>
@@ -117,9 +95,9 @@ export default function Doctors() {
                     <p>{doctor.specialty}</p>
                   </div>
                   <div>
-                    <span>{doctor.clinic || "Clinic not listed"}</span>
+                    <span>{doctor.clinic || t("doctors.clinicNotListed")}</span>
                     <small>
-                      {doctor.city || "City not listed"}
+                      {doctor.city || t("doctors.cityNotListed")}
                       {doctor.phone ? ` - ${doctor.phone}` : ""}
                     </small>
                   </div>
@@ -138,18 +116,14 @@ export default function Doctors() {
       <div className="dashboard doctors-page">
         <section className="top">
           <h1>
-            Our <span>Doctors</span>
+            {t("doctors.requestTitle")} <span>{t("doctors.requestTitleSpan")}</span>
           </h1>
-          <p>
-            If you are a doctor and want to be added, use the request form below.
-          </p>
+          <p>If you are a doctor and want to be added, use the request form below.</p>
         </section>
 
         <section className="card appointment-card">
-          <h2>Request to join</h2>
-          <p>
-            Send your details and we will review them before adding you to the doctor directory.
-          </p>
+          <h2>{t("doctors.requestJoin")}</h2>
+          <p>Send your details and we will review them before adding you to the doctor directory.</p>
 
           {status.message && <div className={`dash-${status.kind}`}>{status.message}</div>}
 
@@ -157,50 +131,46 @@ export default function Doctors() {
             <div className="double-row">
               <input
                 type="text"
-                placeholder="Full name"
+                placeholder={t("doctors.namePlaceholder")}
                 value={form.name}
-                onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
+                onChange={(e) => setForm((c) => ({ ...c, name: e.target.value }))}
               />
               <input
                 type="email"
-                placeholder="Professional email"
+                placeholder={t("doctors.emailPlaceholder")}
                 value={form.email}
-                onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
+                onChange={(e) => setForm((c) => ({ ...c, email: e.target.value }))}
               />
             </div>
-
             <div className="double-row">
               <input
                 type="text"
-                placeholder="Specialty"
+                placeholder={t("doctors.specialtyPlaceholder")}
                 value={form.specialty}
-                onChange={(event) => setForm((current) => ({ ...current, specialty: event.target.value }))}
+                onChange={(e) => setForm((c) => ({ ...c, specialty: e.target.value }))}
               />
               <input
                 type="text"
-                placeholder="Clinic or hospital"
+                placeholder={t("doctors.clinicPlaceholder")}
                 value={form.clinic}
-                onChange={(event) => setForm((current) => ({ ...current, clinic: event.target.value }))}
+                onChange={(e) => setForm((c) => ({ ...c, clinic: e.target.value }))}
               />
             </div>
-
             <input
               type="text"
-              placeholder="City"
+              placeholder={t("doctors.cityPlaceholder")}
               value={form.city}
-              onChange={(event) => setForm((current) => ({ ...current, city: event.target.value }))}
+              onChange={(e) => setForm((c) => ({ ...c, city: e.target.value }))}
             />
-
             <textarea
               className="styled-textarea"
               rows={5}
               placeholder="Short message for the admin team"
               value={form.message}
-              onChange={(event) => setForm((current) => ({ ...current, message: event.target.value }))}
+              onChange={(e) => setForm((c) => ({ ...c, message: e.target.value }))}
             />
-
             <button className="analyze" type="submit" disabled={sending}>
-              {sending ? "Sending..." : "Request addition"}
+              {sending ? t("common.loading") : t("doctors.sendRequest")}
             </button>
           </form>
         </section>

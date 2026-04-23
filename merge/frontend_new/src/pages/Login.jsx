@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "../styles/index.css";
 
 import { auth } from "../lib/firebase";
@@ -11,28 +12,19 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { ensureUserProfile, loadIsAdminByUid } from "../lib/admin";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
 
-function getGoogleAuthErrorMessage(err) {
+function getGoogleAuthErrorMessage(err, t) {
   const code = err?.code || "";
-  if (code === "auth/popup-blocked") {
-    return "Popup blocked by your browser. Redirecting to Google sign-in...";
-  }
-  if (code === "auth/popup-closed-by-user") {
-    return "Google sign-in popup was closed before completing login.";
-  }
-  if (code === "auth/unauthorized-domain") {
-    return "This app domain is not authorized in Firebase Auth settings.";
-  }
-  if (code === "auth/operation-not-allowed") {
-    return "Google sign-in is not enabled in Firebase Authentication.";
-  }
-  if (code === "auth/account-exists-with-different-credential") {
-    return "An account already exists with this email using a different sign-in method.";
-  }
-  return err?.message || "Google login failed";
+  if (code === "auth/popup-blocked")               return t("login.errors.popupBlocked");
+  if (code === "auth/popup-closed-by-user")         return t("login.errors.popupClosed");
+  if (code === "auth/unauthorized-domain")          return t("login.errors.unauthorizedDomain");
+  if (code === "auth/operation-not-allowed")        return t("login.errors.operationNotAllowed");
+  if (code === "auth/account-exists-with-different-credential") return t("login.errors.accountExists");
+  return err?.message || t("login.errors.googleFailed");
 }
 
 function GoogleIcon() {
@@ -45,33 +37,15 @@ function GoogleIcon() {
     </svg>
   );
 }
+
 function EyeIcon({ open }) {
   return open ? (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M2 12s4-8 10-8 10 8 10 8-4 8-10 8-10-8-10-8z" />
       <circle cx="12" cy="12" r="3" />
     </svg>
   ) : (
-    // Eye closed icon variant
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C6 20 2 12 2 12a18.45 18.45 0 0 1 5.06-5.94" />
       <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c6 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19" />
       <line x1="1" y1="1" x2="23" y2="23" />
@@ -82,21 +56,14 @@ function EyeIcon({ open }) {
 export default function AuthSwipe() {
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    date: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const [form, setForm] = useState({ name: "", email: "", date: "", password: "", confirmPassword: "" });
 
   const handleChange = (e) => {
     setError("");
@@ -105,19 +72,15 @@ export default function AuthSwipe() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!form.email || !form.password) {
       setError("Please fill all required fields");
       return;
     }
-
     if (isSignUp && form.password !== form.confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-
     setLoading(true);
-
     try {
       let user;
       if (isSignUp) {
@@ -127,7 +90,6 @@ export default function AuthSwipe() {
         const result = await signInWithEmailAndPassword(auth, form.email, form.password);
         user = result.user;
       }
-
       await ensureUserProfile(user || auth.currentUser);
       const isAdmin = await loadIsAdminByUid((user || auth.currentUser)?.uid);
       navigate(isAdmin ? "/doctors" : "/dashboard");
@@ -149,11 +111,11 @@ export default function AuthSwipe() {
     } catch (err) {
       const code = err?.code || "";
       if (code === "auth/popup-blocked") {
-        setError("Popup blocked by your browser. Redirecting to Google sign-in...");
+        setError(t("login.errors.popupBlocked"));
         await signInWithRedirect(auth, provider);
         return;
       }
-      setError(getGoogleAuthErrorMessage(err));
+      setError(getGoogleAuthErrorMessage(err, t));
     } finally {
       setGoogleLoading(false);
     }
@@ -169,20 +131,23 @@ export default function AuthSwipe() {
 
   return (
     <div className={`auth-page ${isSignUp ? "signup-mode" : ""}`}>
-      <div className="auth-card">
+      {/* Sélecteur de langue en haut à droite */}
+      <div style={{ position: "fixed", top: "16px", right: "16px", zIndex: 100 }}>
+        <LanguageSwitcher />
+      </div>
 
+      <div className="auth-card">
         {/* LEFT */}
         <div className="auth-panel auth-left">
-          <h1>Smart Medic</h1>
-          <h2>{isSignUp ? "Create Account" : "Welcome Back"}</h2>
+          <h1>{t("nav.brandName")}</h1>
+          <h2>{isSignUp ? t("login.signUp") : t("login.signIn")}</h2>
 
           <form className="auth-form" onSubmit={handleSubmit}>
-
             {isSignUp && (
-              <input name="name" placeholder="Full Name" onChange={handleChange} />
+              <input name="name" placeholder={t("login.fullName")} onChange={handleChange} />
             )}
 
-            <input name="email" placeholder="Email" onChange={handleChange} />
+            <input name="email" placeholder={t("login.email")} onChange={handleChange} />
 
             {isSignUp && (
               <input type="date" name="date" onChange={handleChange} />
@@ -192,11 +157,10 @@ export default function AuthSwipe() {
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
-                placeholder="Password"
+                placeholder={t("login.password")}
                 onChange={handleChange}
               />
-              <button type="button" className="eye-toggle"
-                onClick={() => setShowPassword(!showPassword)}>
+              <button type="button" className="eye-toggle" onClick={() => setShowPassword(!showPassword)}>
                 <EyeIcon open={showPassword} />
               </button>
             </div>
@@ -206,11 +170,10 @@ export default function AuthSwipe() {
                 <input
                   type={showConfirm ? "text" : "password"}
                   name="confirmPassword"
-                  placeholder="Confirm Password"
+                  placeholder={t("login.confirmPassword")}
                   onChange={handleChange}
                 />
-                <button type="button" className="eye-toggle"
-                  onClick={() => setShowConfirm(!showConfirm)}>
+                <button type="button" className="eye-toggle" onClick={() => setShowConfirm(!showConfirm)}>
                   <EyeIcon open={showConfirm} />
                 </button>
               </div>
@@ -219,23 +182,17 @@ export default function AuthSwipe() {
             {error && <div className="auth-error">{error}</div>}
 
             <button className="btn primary" disabled={loading}>
-              {loading ? "Loading..." : isSignUp ? "SIGN UP" : "LOGIN"}
+              {loading ? t("common.loading") : isSignUp ? t("login.signUp").toUpperCase() : t("login.signIn").toUpperCase()}
             </button>
 
             <div className="auth-divider"><span>or</span></div>
 
-            <button
-  type="button"
-  className="btn google"
-  onClick={handleGoogle}
-  disabled={googleLoading}
->
-  <GoogleIcon />
-  <span style={{ marginLeft: "8px" }}>
-    {googleLoading ? "Loading..." : "Continue with Google"}
-  </span>
-</button>
-
+            <button type="button" className="btn google" onClick={handleGoogle} disabled={googleLoading}>
+              <GoogleIcon />
+              <span style={{ marginLeft: "8px" }}>
+                {googleLoading ? t("common.loading") : t("login.continueWithGoogle")}
+              </span>
+            </button>
           </form>
         </div>
 
@@ -243,21 +200,20 @@ export default function AuthSwipe() {
         <div className="auth-panel auth-right">
           {!isSignUp ? (
             <>
-              <h3>New Here?</h3>
+              <h3>{t("login.dontHaveAccount")}</h3>
               <button className="btn outline1" onClick={() => switchMode(true)}>
-                Sign Up
+                {t("login.signUp")}
               </button>
             </>
           ) : (
             <>
-              <h3>Already have account?</h3>
+              <h3>{t("login.alreadyHaveAccount")}</h3>
               <button className="btn outline1" onClick={() => switchMode(false)}>
-                Login
+                {t("login.signIn")}
               </button>
             </>
           )}
         </div>
-
       </div>
     </div>
   );
