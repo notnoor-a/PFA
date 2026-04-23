@@ -280,6 +280,9 @@ body {
 .auth-page.signup-mode .auth-left  { transform: translateX(100%); }
 .auth-page.signup-mode .auth-right { transform: translateX(-100%); }
 
+[dir="rtl"] .auth-page.signup-mode .auth-left  { transform: translateX(-100%); }
+[dir="rtl"] .auth-page.signup-mode .auth-right { transform: translateX(100%); }
+
 /* RESPONSIVE */
 @media (max-width: 860px) {
   .auth-card {
