@@ -16,12 +16,19 @@
  */
 
 import { auth } from "./firebase";
+import i18n from "../i18n/i18n";
 
 const RAW_API_URL =
   (import.meta.env && import.meta.env.VITE_API_URL) || "http://localhost:3001";
 
 // Strip a trailing slash so `${API_URL}${path}` never produces a double slash.
 export const API_URL = String(RAW_API_URL).replace(/\/+$/, "");
+
+function getCurrentLanguage() {
+  const raw = String(i18n.language || "en").toLowerCase();
+  const lang = raw.split("-")[0];
+  return ["en", "fr", "ar"].includes(lang) ? lang : "en";
+}
 
 /**
  * Wait until Firebase has settled on whether a user is signed in, then return
@@ -66,6 +73,7 @@ export async function apiFetch(path, options = {}) {
 
   const finalHeaders = {
     Accept: "application/json",
+    "x-app-lang": getCurrentLanguage(),
     ...headers,
   };
 

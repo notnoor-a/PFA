@@ -1,268 +1,349 @@
 {
-  "nav": {
-    "dashboard": "لوحة التحكم",
-    "appointments": "المواعيد",
-    "doctors": "الأطباء",
-    "history": "السجل",
-    "reviewRequests": "مراجعة الطلبات",
-    "signOut": "تسجيل الخروج",
-    "brandName": "سمارت ميديك"
-  },
-  "login": {
-    "signIn": "تسجيل الدخول",
-    "signUp": "إنشاء حساب",
-    "email": "البريد الإلكتروني",
-    "password": "كلمة المرور",
-    "confirmPassword": "تأكيد كلمة المرور",
-    "fullName": "الاسم الكامل",
-    "signInWithGoogle": "تسجيل الدخول باستخدام Google",
-    "continueWithGoogle": "المتابعة مع Google",
-    "orContinueWith": "أو المتابعة بـ",
-    "alreadyHaveAccount": "هل لديك حساب بالفعل؟",
-    "dontHaveAccount": "ليس لديك حساب؟",
-    "forgotPassword": "نسيت كلمة المرور؟",
-    "errors": {
-      "popupBlocked": "تم حظر النافذة المنبثقة من المتصفح. جارٍ إعادة التوجيه إلى Google...",
-      "popupClosed": "تم إغلاق نافذة Google قبل إتمام تسجيل الدخول.",
-      "unauthorizedDomain": "هذا النطاق غير مصرح به في إعدادات Firebase.",
-      "operationNotAllowed": "تسجيل الدخول عبر Google غير مفعّل.",
-      "accountExists": "يوجد حساب بهذا البريد الإلكتروني باستخدام طريقة تسجيل دخول مختلفة.",
-      "googleFailed": "فشل تسجيل الدخول بـ Google"
+    "nav": {
+        "dashboard": "لوحة التحكم",
+        "appointments": "المواعيد",
+        "doctors": "الأطباء",
+        "history": "السجل",
+        "reviewRequests": "مراجعة الطلبات",
+        "signOut": "تسجيل الخروج",
+        "brandName": "سمارت ميديك",
+        "profile": "الملف الشخصي"
+    },
+    "login": {
+        "signIn": "تسجيل الدخول",
+        "signUp": "إنشاء حساب",
+        "email": "البريد الإلكتروني",
+        "password": "كلمة المرور",
+        "confirmPassword": "تأكيد كلمة المرور",
+        "fullName": "الاسم الكامل",
+        "signInWithGoogle": "تسجيل الدخول باستخدام Google",
+        "continueWithGoogle": "المتابعة مع Google",
+        "orContinueWith": "أو المتابعة بـ",
+        "alreadyHaveAccount": "هل لديك حساب بالفعل؟",
+        "dontHaveAccount": "ليس لديك حساب؟",
+        "forgotPassword": "نسيت كلمة المرور؟",
+        "errors": {
+            "popupBlocked": "تم حظر النافذة المنبثقة من المتصفح. جارٍ إعادة التوجيه إلى Google...",
+            "popupClosed": "تم إغلاق نافذة Google قبل إتمام تسجيل الدخول.",
+            "unauthorizedDomain": "هذا النطاق غير مصرح به في إعدادات Firebase.",
+            "operationNotAllowed": "تسجيل الدخول عبر Google غير مفعّل.",
+            "accountExists": "يوجد حساب بهذا البريد الإلكتروني باستخدام طريقة تسجيل دخول مختلفة.",
+            "googleFailed": "فشل تسجيل الدخول بـ Google",
+            "requiredFields": "يرجى ملء جميع الحقول المطلوبة.",
+            "passwordMismatch": "كلمتا المرور غير متطابقتين.",
+            "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+            "emailInUse": "يوجد حساب بهذا البريد الإلكتروني بالفعل.",
+            "weakPassword": "كلمة المرور ضعيفة. استخدم 6 أحرف على الأقل.",
+            "authFailed": "فشلت عملية تسجيل الدخول. حاول مرة أخرى."
+        }
+    },
+    "dashboard": {
+        "title": "لوحة التحكم",
+        "subtitle": "تحقق من أعراضك وابحث عن الطبيب المناسب",
+        "symptoms": {
+            "title": "اختر أعراضك",
+            "subtitle": "اختر كل ما ينطبق عليك",
+            "analyze": "تحليل الأعراض",
+            "analyzing": "جارٍ التحليل...",
+            "selectAtLeastOne": "يرجى اختيار عرض واحد على الأقل.",
+            "list": {
+                "Headache": "صداع",
+                "Fever": "حمى",
+                "Fatigue": "إرهاق",
+                "Cough": "سعال",
+                "Sore throat": "التهاب الحلق",
+                "Nausea": "غثيان",
+                "Shortness of breath": "ضيق في التنفس",
+                "Chest pain": "ألم في الصدر",
+                "Back pain": "ألم في الظهر",
+                "Dizziness": "دوخة",
+                "Rash": "طفح جلدي",
+                "Joint pain": "ألم في المفاصل",
+                "Vomiting": "قيء",
+                "Loss of appetite": "فقدان الشهية",
+                "Blurred vision": "عدم وضوح الرؤية"
+            },
+            "customPlaceholder": "أضف عرضًا مخصصًا..."
+        },
+        "results": {
+            "title": "نتائج التحليل",
+            "possibleConditions": "الحالات المحتملة",
+            "urgency": "درجة الإلحاح",
+            "recommendation": "التوصية",
+            "matchedSpecialists": "الأخصائيون الموصى بهم",
+            "urgent": "عاجل",
+            "soon": "قريباً",
+            "routine": "روتيني"
+        },
+        "nearby": {
+            "title": "الأطباء القريبون منك",
+            "findNearby": "البحث عن أطباء قريبين",
+            "finding": "جارٍ البحث...",
+            "noLocation": "متصفحك لا يدعم تحديد الموقع الجغرافي.",
+            "locationError": "تعذّر قراءة موقعك الحالي. يرجى المحاولة مرة أخرى.",
+            "noDoctors": "لا يوجد أطباء قريبون متاحون حالياً.",
+            "bookAppointment": "حجز موعد",
+            "km": "كم",
+            "permissionDenied": "تم رفض إذن الموقع. فعّل إذن الموقع ثم أعد المحاولة.",
+            "locationUnavailable": "الموقع غير متاح الآن. تحقق من خدمات الموقع في جهازك ثم أعد المحاولة.",
+            "locationTimeout": "انتهت مهلة طلب الموقع. يرجى المحاولة مرة أخرى."
+        },
+        "errors": {
+            "malformedResponse": "استجابة غير صحيحة من الخادم.",
+            "analysisFailed": "فشل التحليل. تحقق من تشغيل الخادم وحاول مجدداً."
+        },
+        "titleSuffix": "اليوم؟"
+    },
+    "appointments": {
+        "title": "طلب",
+        "titleSpan": "موعد",
+        "sendRequest": "إرسال الطلب",
+        "sending": "جارٍ الإرسال...",
+        "selectDoctor": "اختر طبيباً",
+        "date": "التاريخ",
+        "time": "الوقت",
+        "reasonPlaceholder": "سبب الزيارة",
+        "selectedDoctor": "الطبيب المختار",
+        "doctorLocation": "موقع الطبيب",
+        "locationUnavailable": "الموقع غير متاح",
+        "errors": {
+            "notSignedIn": "يجب تسجيل الدخول لطلب موعد.",
+            "completeFields": "يرجى ملء جميع الحقول.",
+            "futureDate": "يرجى اختيار تاريخ ووقت مستقبليين.",
+            "missingEmailKeys": "مفاتيح EmailJS مفقودة.",
+            "sendFailed": "فشل إرسال طلب الموعد."
+        },
+        "success": "تم إرسال طلب موعدك بنجاح!",
+        "replyNote": "يرجى الرد مباشرة على هذا البريد الإلكتروني لتأكيد الوقت النهائي.",
+        "subtitle": "تبدأ هذه الصفحة طلب الموعد. يتم إرسال الطلب عبر البريد الإلكتروني، ثم يمكن للطبيب والمريض تأكيد الوقت النهائي عبر الرد.",
+        "mapTitle": "الخريطة لـ {{name}}",
+        "openDirections": "فتح الاتجاهات في خرائط Google",
+        "directionsUnavailable": "الاتجاهات غير متاحة لهذا الطبيب حاليًا لأن إحداثيات الخريطة غير متوفرة.",
+        "defaults": {
+            "doctor": "طبيب",
+            "patient": "مريض"
+        }
+    },
+    "history": {
+        "title": "سجل",
+        "titleSpan": "التحليلات",
+        "subtitle": "راجع فحوصات الأعراض السابقة ونتائج الذكاء الاصطناعي",
+        "loading": "جارٍ تحميل سجلك…",
+        "noHistory": "لا يوجد سجل حتى الآن",
+        "noHistoryDesc": "قم بأول تحليل للأعراض من لوحة التحكم.",
+        "possibleConditions": "الحالات المحتملة",
+        "delete": "حذف",
+        "confirmDelete": "هل تريد حذف هذا السجل؟",
+        "urgent": "عاجل",
+        "soon": "قريباً",
+        "errors": {
+            "loadFailed": "تعذّر تحميل السجل. تحقق من تشغيل الخادم.",
+            "deleteFailed": "تعذّر حذف هذا السجل.",
+            "partialClear": "مسح جزئي: تعذر حذف عنصر واحد أو أكثر ({{message}})."
+        },
+        "analysisCount": "{{count}} تحليل",
+        "clearAll": "مسح الكل",
+        "confirmClear": "هل تريد حذف {{count}} تحليلًا محفوظًا؟ لا يمكن التراجع عن هذا الإجراء.",
+        "hide": "إخفاء",
+        "view": "عرض",
+        "moreSymptoms": "+{{count}} المزيد",
+        "modelHintLabel": "تلميح النموذج",
+        "routine": "روتيني"
+    },
+    "profile": {
+        "title": "ملفي الشخصي",
+        "name": "الاسم",
+        "email": "البريد الإلكتروني",
+        "birthdate": "تاريخ الميلاد",
+        "saveChanges": "حفظ التغييرات",
+        "saving": "جارٍ الحفظ...",
+        "uploadPhoto": "تغيير الصورة",
+        "changePassword": "تغيير كلمة المرور",
+        "currentPassword": "كلمة المرور الحالية",
+        "newPassword": "كلمة المرور الجديدة",
+        "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
+        "success": {
+            "profileUpdated": "تم تحديث الملف الشخصي.",
+            "photoUploaded": "تم تحديث الصورة الشخصية بنجاح.",
+            "passwordChanged": "تم تغيير كلمة المرور بنجاح."
+        },
+        "errors": {
+            "nameShort": "يجب أن يحتوي الاسم على حرفين على الأقل.",
+            "invalidEmail": "يرجى إدخال بريد إلكتروني صحيح.",
+            "ageTooYoung": "يجب أن يكون عمرك 13 عاماً على الأقل.",
+            "profileFailed": "تعذّر تحديث الملف الشخصي.",
+            "photoFailed": "تعذّر رفع صورة الملف الشخصي.",
+            "notImageFile": "يرجى اختيار ملف صورة.",
+            "passwordShort": "يجب أن تحتوي كلمة المرور على 6 أحرف على الأقل.",
+            "passwordMismatch": "كلمة المرور الجديدة وتأكيدها غير متطابقين.",
+            "passwordFailed": "تعذّر تغيير كلمة المرور.",
+            "canvasUnavailable": "سياق Canvas غير متاح.",
+            "imageProcessingFailed": "فشلت معالجة الصورة.",
+            "invalidImageFile": "ملف صورة غير صالح.",
+            "couldNotReadFile": "تعذّر قراءة ملف الصورة."
+        },
+        "subtitle": "أدر تفاصيل حسابك وإعدادات الأمان.",
+        "titleMark": "*",
+        "personalInfo": "المعلومات الشخصية",
+        "passwordHelp": "غيّر كلمة المرور لتحسين أمان الحساب.",
+        "avatarAlt": "صورة الملف الشخصي"
+    },
+    "doctors": {
+        "listTitle": "قائمة",
+        "listTitleSpan": "الأطباء",
+        "listSubtitle": "هؤلاء هم الأطباء المتاحون حالياً في التطبيق.",
+        "activeDoctors": "الأطباء النشطون",
+        "clinicNotListed": "العيادة غير مدرجة",
+        "cityNotListed": "المدينة غير مدرجة",
+        "bookAppointment": "حجز موعد",
+        "requestTitle": "أطباؤنا",
+        "requestTitleSpan": "",
+        "requestJoin": "طلب انضمام",
+        "namePlaceholder": "الاسم الكامل",
+        "emailPlaceholder": "البريد الإلكتروني المهني",
+        "specialtyPlaceholder": "التخصص",
+        "clinicPlaceholder": "العيادة أو المستشفى",
+        "cityPlaceholder": "المدينة",
+        "sendRequest": "إرسال الطلب",
+        "errors": {
+            "completeFields": "يرجى إدخال اسمك وبريدك الإلكتروني وتخصصك.",
+            "sendFailed": "فشل إرسال الطلب.",
+            "locationRequired": "يرجى اختيار موقع عيادتك على الخريطة."
+        },
+        "requestSaved": "تم حفظ طلبك. يمكن للمسؤول مراجعته والموافقة عليه.",
+        "locationTitle": "موقع العيادة",
+        "locationHint": "انقر على الخريطة لتحديد موقع عيادتك. هذا مطلوب لميزة الأطباء القريبين والاتجاهات.",
+        "locationSelectedLabel": "الموقع المحدد",
+        "locationNone": "لم يتم اختيار موقع بعد",
+        "clearLocation": "مسح الموقع",
+        "requestSubtitle": "إذا كنت طبيبًا وتريد إضافتك، استخدم نموذج الطلب أدناه.",
+        "requestDescription": "أرسل بياناتك وسنراجعها قبل إضافتك إلى دليل الأطباء.",
+        "messagePlaceholder": "رسالة قصيرة لفريق الإدارة"
+    },
+    "doctorRequests": {
+        "title": "طلبات",
+        "titleSpan": "الأطباء",
+        "subtitle": "راجع الطلبات المعلقة وافقها في دليل الأطباء.",
+        "pendingRequests": "الطلبات المعلقة",
+        "noRequests": "لا توجد طلبات أطباء حتى الآن.",
+        "approve": "موافقة",
+        "reject": "رفض",
+        "approved": "موافق عليه",
+        "rejected": "مرفوض",
+        "justNow": "للتو",
+        "clinicNotListed": "العيادة غير مدرجة",
+        "errors": {
+            "approveFailed": "تعذّر الموافقة على الطلب.",
+            "rejectFailed": "تعذّر رفض الطلب."
+        },
+        "locationLabel": "الموقع",
+        "locationMissing": "الموقع غير متوفر",
+        "statusLabel": "الحالة",
+        "submittedLabel": "تاريخ الإرسال",
+        "status": {
+            "pending": "قيد المراجعة",
+            "approved": "تمت الموافقة",
+            "rejected": "مرفوض"
+        },
+        "messages": {
+            "approvedAdded": "تمت الموافقة على {{name}} وإضافته إلى قائمة الأطباء.",
+            "rejected": "تم رفض {{name}}."
+        }
+    },
+    "learn": {
+        "heroTitle": "مساعدك الصحي الذكي",
+        "heroSubtitle": "حلل أعراضك، اعثر على المختصين المناسبين وأدر صحتك — كل ذلك في مكان واحد.",
+        "getStarted": "ابدأ الآن",
+        "featuresTitle": "لماذا تختار سمارت ميديك؟",
+        "features": {
+            "instantAnalysis": {
+                "title": "تحليل فوري",
+                "desc": "احصل على تحليل أعراض مدعوم بالذكاء الاصطناعي في ثوانٍ، دون غرف انتظار."
+            },
+            "smartAI": {
+                "title": "محرك ذكاء اصطناعي متقدم",
+                "desc": "مدعوم بنماذج لغوية متقدمة مدرّبة على قواعد معرفة طبية واسعة."
+            },
+            "specialistMatching": {
+                "title": "مطابقة المختصين",
+                "desc": "نطابق أعراضك مع النوع الصحيح من المختص لتتلقى الرعاية الصحيحة."
+            },
+            "privateSecure": {
+                "title": "خاص وآمن",
+                "desc": "بياناتك الصحية تبقى خاصة. لا نبيع أو نشارك معلوماتك الشخصية أبداً."
+            },
+            "alwaysAvailable": {
+                "title": "متاح دائماً",
+                "desc": "تمتع بمساعدك الصحي على مدار الساعة، من أي مكان في العالم، على أي جهاز."
+            },
+            "detailedReports": {
+                "title": "تقارير مفصّلة",
+                "desc": "تلقّ تفسيرات واضحة وقابلة للقراءة للحالات المحتملة والخطوات التالية."
+            }
+        },
+        "howItWorksTitle": "كيف يعمل",
+        "steps": {
+            "selectSymptoms": {
+                "title": "اختر الأعراض",
+                "desc": "اختر من الأعراض الشائعة أو اكتب أعراضك بلغة طبيعية."
+            },
+            "aiAnalyzes": {
+                "title": "الذكاء الاصطناعي يحلل",
+                "desc": "يحلل الذكاء الاصطناعي ملف أعراضك مقارنةً بآلاف الحالات."
+            },
+            "getResults": {
+                "title": "احصل على النتائج",
+                "desc": "تلقّ نتائج واضحة مع المختصين الموصى بهم والخطوات التالية."
+            }
+        },
+        "startNow": "ابدأ الآن",
+        "heroBadge": "مساعد صحي مدعوم بالذكاء الاصطناعي",
+        "heroTitleEmphasis": "قبل زيارة الطبيب",
+        "sectionProcess": "الخطوات",
+        "sectionFeatures": "المزايا",
+        "stats": {
+            "symptoms": "أعراض مغطاة",
+            "analysis": "تحليل مدعوم بالذكاء الاصطناعي",
+            "availability": "متاح دائمًا"
+        },
+        "disclaimer": {
+            "title": "تنبيه مهم",
+            "body": "Smart Medic أداة معلوماتية ولا يقدم تشخيصًا أو علاجًا أو استشارة طبية مهنية. استشر دائمًا مختصًا صحيًا مؤهلًا. في حالات الطوارئ اتصل بخدمات الطوارئ فورًا."
+        },
+        "ctaTitle": "هل أنت مستعد لفهم صحتك بشكل أفضل؟",
+        "ctaBody": "انضم إلى Smart Medic اليوم واحصل على تحليل فوري للأعراض بالذكاء الاصطناعي.",
+        "footer": "© {{year}} Smart Medic - مساعد صحي بالذكاء الاصطناعي"
+    },
+    "common": {
+        "loading": "جارٍ التحميل...",
+        "error": "خطأ",
+        "retry": "إعادة المحاولة",
+        "cancel": "إلغاء",
+        "save": "حفظ",
+        "delete": "حذف",
+        "confirm": "تأكيد",
+        "back": "رجوع",
+        "next": "التالي",
+        "submit": "إرسال",
+        "close": "إغلاق",
+        "search": "بحث",
+        "noData": "لا توجد بيانات متاحة",
+        "specialty": "التخصص",
+        "generalMedicine": "الطب العام",
+        "add": "إضافة",
+        "likelihood": {
+            "high": "احتمال مرتفع",
+            "medium": "احتمال متوسط",
+            "low": "احتمال منخفض"
+        }
+    },
+    "lang": {
+        "select": "اللغة",
+        "en": "English",
+        "fr": "Français",
+        "ar": "العربية"
+    },
+    "quest": {
+        "learnMore": "اعرف المزيد"
     }
-  },
-  "dashboard": {
-    "title": "لوحة التحكم",
-    "subtitle": "تحقق من أعراضك وابحث عن الطبيب المناسب",
-    "symptoms": {
-      "title": "اختر أعراضك",
-      "subtitle": "اختر كل ما ينطبق عليك",
-      "analyze": "تحليل الأعراض",
-      "analyzing": "جارٍ التحليل...",
-      "selectAtLeastOne": "يرجى اختيار عرض واحد على الأقل.",
-      "list": {
-        "Headache": "صداع",
-        "Fever": "حمى",
-        "Fatigue": "إرهاق",
-        "Cough": "سعال",
-        "Sore throat": "التهاب الحلق",
-        "Nausea": "غثيان",
-        "Shortness of breath": "ضيق في التنفس",
-        "Chest pain": "ألم في الصدر",
-        "Back pain": "ألم في الظهر",
-        "Dizziness": "دوخة",
-        "Rash": "طفح جلدي",
-        "Joint pain": "ألم في المفاصل",
-        "Vomiting": "قيء",
-        "Loss of appetite": "فقدان الشهية",
-        "Blurred vision": "عدم وضوح الرؤية"
-      }
-    },
-    "results": {
-      "title": "نتائج التحليل",
-      "possibleConditions": "الحالات المحتملة",
-      "urgency": "درجة الإلحاح",
-      "recommendation": "التوصية",
-      "matchedSpecialists": "الأخصائيون الموصى بهم",
-      "urgent": "عاجل",
-      "soon": "قريباً",
-      "routine": "روتيني"
-    },
-    "nearby": {
-      "title": "الأطباء القريبون منك",
-      "findNearby": "البحث عن أطباء قريبين",
-      "finding": "جارٍ البحث...",
-      "noLocation": "متصفحك لا يدعم تحديد الموقع الجغرافي.",
-      "locationError": "تعذّر قراءة موقعك الحالي. يرجى المحاولة مرة أخرى.",
-      "noDoctors": "لا يوجد أطباء قريبون متاحون حالياً.",
-      "bookAppointment": "حجز موعد",
-      "km": "كم"
-    },
-    "errors": {
-      "malformedResponse": "استجابة غير صحيحة من الخادم.",
-      "analysisFailed": "فشل التحليل. تحقق من تشغيل الخادم وحاول مجدداً."
-    }
-  },
-  "appointments": {
-    "title": "طلب",
-    "titleSpan": "موعد",
-    "sendRequest": "إرسال الطلب",
-    "sending": "جارٍ الإرسال...",
-    "selectDoctor": "اختر طبيباً",
-    "date": "التاريخ",
-    "time": "الوقت",
-    "reasonPlaceholder": "سبب الزيارة",
-    "selectedDoctor": "الطبيب المختار",
-    "doctorLocation": "موقع الطبيب",
-    "locationUnavailable": "الموقع غير متاح",
-    "errors": {
-      "notSignedIn": "يجب تسجيل الدخول لطلب موعد.",
-      "completeFields": "يرجى ملء جميع الحقول.",
-      "futureDate": "يرجى اختيار تاريخ ووقت مستقبليين.",
-      "missingEmailKeys": "مفاتيح EmailJS مفقودة.",
-      "sendFailed": "فشل إرسال طلب الموعد."
-    },
-    "success": "تم إرسال طلب موعدك بنجاح!",
-    "replyNote": "يرجى الرد مباشرة على هذا البريد الإلكتروني لتأكيد الوقت النهائي."
-  },
-  "history": {
-    "title": "سجل",
-    "titleSpan": "التحليلات",
-    "subtitle": "راجع فحوصات الأعراض السابقة ونتائج الذكاء الاصطناعي",
-    "loading": "جارٍ تحميل سجلك…",
-    "noHistory": "لا يوجد سجل حتى الآن",
-    "noHistoryDesc": "قم بأول تحليل للأعراض من لوحة التحكم.",
-    "possibleConditions": "الحالات المحتملة",
-    "delete": "حذف",
-    "confirmDelete": "هل تريد حذف هذا السجل؟",
-    "urgent": "عاجل",
-    "soon": "قريباً",
-    "errors": {
-      "loadFailed": "تعذّر تحميل السجل. تحقق من تشغيل الخادم.",
-      "deleteFailed": "تعذّر حذف هذا السجل."
-    }
-  },
-  "profile": {
-    "title": "ملفي الشخصي",
-    "name": "الاسم",
-    "email": "البريد الإلكتروني",
-    "birthdate": "تاريخ الميلاد",
-    "saveChanges": "حفظ التغييرات",
-    "saving": "جارٍ الحفظ...",
-    "uploadPhoto": "تغيير الصورة",
-    "changePassword": "تغيير كلمة المرور",
-    "currentPassword": "كلمة المرور الحالية",
-    "newPassword": "كلمة المرور الجديدة",
-    "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
-    "success": {
-      "profileUpdated": "تم تحديث الملف الشخصي.",
-      "photoUploaded": "تم تحديث الصورة الشخصية بنجاح.",
-      "passwordChanged": "تم تغيير كلمة المرور بنجاح."
-    },
-    "errors": {
-      "nameShort": "يجب أن يحتوي الاسم على حرفين على الأقل.",
-      "invalidEmail": "يرجى إدخال بريد إلكتروني صحيح.",
-      "ageTooYoung": "يجب أن يكون عمرك 13 عاماً على الأقل.",
-      "profileFailed": "تعذّر تحديث الملف الشخصي.",
-      "photoFailed": "تعذّر رفع صورة الملف الشخصي.",
-      "notImageFile": "يرجى اختيار ملف صورة.",
-      "passwordShort": "يجب أن تحتوي كلمة المرور على 6 أحرف على الأقل.",
-      "passwordMismatch": "كلمة المرور الجديدة وتأكيدها غير متطابقين.",
-      "passwordFailed": "تعذّر تغيير كلمة المرور.",
-      "canvasUnavailable": "سياق Canvas غير متاح.",
-      "imageProcessingFailed": "فشلت معالجة الصورة.",
-      "invalidImageFile": "ملف صورة غير صالح.",
-      "couldNotReadFile": "تعذّر قراءة ملف الصورة."
-    }
-  },
-  "doctors": {
-    "listTitle": "قائمة",
-    "listTitleSpan": "الأطباء",
-    "listSubtitle": "هؤلاء هم الأطباء المتاحون حالياً في التطبيق.",
-    "activeDoctors": "الأطباء النشطون",
-    "clinicNotListed": "العيادة غير مدرجة",
-    "cityNotListed": "المدينة غير مدرجة",
-    "bookAppointment": "حجز موعد",
-    "requestTitle": "أطباؤنا",
-    "requestTitleSpan": "",
-    "requestJoin": "طلب انضمام",
-    "namePlaceholder": "الاسم الكامل",
-    "emailPlaceholder": "البريد الإلكتروني المهني",
-    "specialtyPlaceholder": "التخصص",
-    "clinicPlaceholder": "العيادة أو المستشفى",
-    "cityPlaceholder": "المدينة",
-    "sendRequest": "إرسال الطلب",
-    "errors": {
-      "completeFields": "يرجى إدخال اسمك وبريدك الإلكتروني وتخصصك.",
-      "sendFailed": "فشل إرسال الطلب."
-    },
-    "requestSaved": "تم حفظ طلبك. يمكن للمسؤول مراجعته والموافقة عليه."
-  },
-  "doctorRequests": {
-    "title": "طلبات",
-    "titleSpan": "الأطباء",
-    "subtitle": "راجع الطلبات المعلقة وافقها في دليل الأطباء.",
-    "pendingRequests": "الطلبات المعلقة",
-    "noRequests": "لا توجد طلبات أطباء حتى الآن.",
-    "approve": "موافقة",
-    "reject": "رفض",
-    "approved": "موافق عليه",
-    "rejected": "مرفوض",
-    "justNow": "للتو",
-    "clinicNotListed": "العيادة غير مدرجة",
-    "errors": {
-      "approveFailed": "تعذّر الموافقة على الطلب.",
-      "rejectFailed": "تعذّر رفض الطلب."
-    }
-  },
-  "learn": {
-    "heroTitle": "مساعدك الصحي الذكي",
-    "heroSubtitle": "حلل أعراضك، اعثر على المختصين المناسبين وأدر صحتك — كل ذلك في مكان واحد.",
-    "getStarted": "ابدأ الآن",
-    "featuresTitle": "لماذا تختار سمارت ميديك؟",
-    "features": {
-      "instantAnalysis": {
-        "title": "تحليل فوري",
-        "desc": "احصل على تحليل أعراض مدعوم بالذكاء الاصطناعي في ثوانٍ، دون غرف انتظار."
-      },
-      "smartAI": {
-        "title": "محرك ذكاء اصطناعي متقدم",
-        "desc": "مدعوم بنماذج لغوية متقدمة مدرّبة على قواعد معرفة طبية واسعة."
-      },
-      "specialistMatching": {
-        "title": "مطابقة المختصين",
-        "desc": "نطابق أعراضك مع النوع الصحيح من المختص لتتلقى الرعاية الصحيحة."
-      },
-      "privateSecure": {
-        "title": "خاص وآمن",
-        "desc": "بياناتك الصحية تبقى خاصة. لا نبيع أو نشارك معلوماتك الشخصية أبداً."
-      },
-      "alwaysAvailable": {
-        "title": "متاح دائماً",
-        "desc": "تمتع بمساعدك الصحي على مدار الساعة، من أي مكان في العالم، على أي جهاز."
-      },
-      "detailedReports": {
-        "title": "تقارير مفصّلة",
-        "desc": "تلقّ تفسيرات واضحة وقابلة للقراءة للحالات المحتملة والخطوات التالية."
-      }
-    },
-    "howItWorksTitle": "كيف يعمل",
-    "steps": {
-      "selectSymptoms": {
-        "title": "اختر الأعراض",
-        "desc": "اختر من الأعراض الشائعة أو اكتب أعراضك بلغة طبيعية."
-      },
-      "aiAnalyzes": {
-        "title": "الذكاء الاصطناعي يحلل",
-        "desc": "يحلل الذكاء الاصطناعي ملف أعراضك مقارنةً بآلاف الحالات."
-      },
-      "getResults": {
-        "title": "احصل على النتائج",
-        "desc": "تلقّ نتائج واضحة مع المختصين الموصى بهم والخطوات التالية."
-      }
-    },
-    "startNow": "ابدأ الآن"
-  },
-  "common": {
-    "loading": "جارٍ التحميل...",
-    "error": "خطأ",
-    "retry": "إعادة المحاولة",
-    "cancel": "إلغاء",
-    "save": "حفظ",
-    "delete": "حذف",
-    "confirm": "تأكيد",
-    "back": "رجوع",
-    "next": "التالي",
-    "submit": "إرسال",
-    "close": "إغلاق",
-    "search": "بحث",
-    "noData": "لا توجد بيانات متاحة",
-    "specialty": "التخصص",
-    "generalMedicine": "الطب العام"
-  },
-  "lang": {
-    "select": "اللغة",
-    "en": "English",
-    "fr": "Français",
-    "ar": "العربية"
-  }
 }

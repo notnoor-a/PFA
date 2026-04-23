@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import emailjs from "@emailjs/browser";
 import { collection, onSnapshot } from "firebase/firestore";
@@ -57,14 +57,18 @@ export default function Appointments() {
         setDoctors(availableDoctors);
         setForm((current) => {
           const desiredDoctorId = current.doctorId || preferredDoctorId;
-          const selectionStillExists = availableDoctors.some((doctor) => doctor.id === desiredDoctorId);
+          const selectionStillExists = availableDoctors.some(
+            (doctor) => doctor.id === desiredDoctorId
+          );
           return {
             ...current,
             doctorId: selectionStillExists ? desiredDoctorId : (availableDoctors[0]?.id || ""),
           };
         });
       },
-      () => { setDoctors(DEFAULT_DOCTORS); }
+      () => {
+        setDoctors(DEFAULT_DOCTORS);
+      }
     );
     return unsubscribe;
   }, [preferredDoctorId, isAdmin]);
@@ -81,8 +85,8 @@ export default function Appointments() {
     : "";
   const currentUser = auth.currentUser;
 
-  const requestAppointment = async (e) => {
-    e.preventDefault();
+  const requestAppointment = async (event) => {
+    event.preventDefault();
     setError("");
     setBanner({ kind: "", message: "" });
 
@@ -115,9 +119,9 @@ export default function Appointments() {
         serviceId,
         templateId,
         {
-          doctor_name: selectedDoctor?.name || "Doctor",
+          doctor_name: selectedDoctor?.name || t("appointments.defaults.doctor"),
           doctor_email: selectedDoctor?.email || "",
-          patient_name: currentUser.displayName || "Patient",
+          patient_name: currentUser.displayName || t("appointments.defaults.patient"),
           patient_email: currentUser.email || "",
           appointment_date: form.date,
           appointment_time: form.time,
@@ -150,10 +154,7 @@ export default function Appointments() {
           <h1>
             {t("appointments.title")} <span>{t("appointments.titleSpan")}</span>
           </h1>
-          <p>
-            This page only starts the conversation. We send the request by email,
-            then the doctor and patient can agree on the final time by replying.
-          </p>
+          <p>{t("appointments.subtitle")}</p>
         </section>
 
         {error && <div className="dash-error">{error}</div>}
@@ -215,7 +216,9 @@ export default function Appointments() {
                   <>
                     <div className="doctor-map-wrap">
                       <iframe
-                        title={`Map for ${selectedDoctor.name || "selected doctor"}`}
+                        title={t("appointments.mapTitle", {
+                          name: selectedDoctor.name || t("appointments.defaults.doctor"),
+                        })}
                         src={mapEmbedUrl}
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
@@ -227,19 +230,17 @@ export default function Appointments() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Open Directions In Google Maps
+                      {t("appointments.openDirections")}
                     </a>
                   </>
                 ) : (
-                  <p className="doctor-location-fallback">
-                    Directions are unavailable for this doctor right now because map coordinates are missing.
-                  </p>
+                  <p className="doctor-location-fallback">{t("appointments.directionsUnavailable")}</p>
                 )}
               </div>
             )}
 
             <button className="analyze" type="submit" disabled={loading}>
-              {loading ? t("common.loading") : t("appointments.sendRequest")}
+              {loading ? t("appointments.sending") : t("appointments.sendRequest")}
             </button>
           </form>
         </div>

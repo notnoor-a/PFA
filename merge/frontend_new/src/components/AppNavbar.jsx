@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { auth, db } from "../lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
@@ -42,13 +42,17 @@ export default function AppNavbar() {
   const isActive = (path) => (location.pathname === path ? "active" : "");
 
   if (adminUser === null) {
-    return <nav className="navbar"><div className="navbar-brand" /></nav>;
+    return (
+      <nav className="navbar">
+        <div className="navbar-brand" />
+      </nav>
+    );
   }
 
   return (
     <nav className="navbar">
-      <div className="navbar-brand" onClick={() => navigate(adminUser ? "/doctors" : "/dashboard")}>
-        <span className="nav-logo">⚕</span>
+      <div className="navbar-brand" onClick={() => navigate(adminUser ? "/doctors" : "/dashboard") }>
+        <span className="nav-logo">+</span>
         <span>{t("nav.brandName")}</span>
       </div>
 
@@ -56,12 +60,14 @@ export default function AppNavbar() {
         {adminUser ? (
           <>
             <button
+              type="button"
               className={`nav-link ${isActive("/doctors")}`}
               onClick={() => navigate("/doctors")}
             >
               {t("nav.doctors")}
             </button>
             <button
+              type="button"
               className={`nav-link ${isActive("/doctor-requests")}`}
               onClick={() => navigate("/doctor-requests")}
             >
@@ -71,12 +77,14 @@ export default function AppNavbar() {
         ) : (
           <>
             <button
+              type="button"
               className={`nav-link ${isActive("/dashboard")}`}
               onClick={() => navigate("/dashboard")}
             >
               {t("nav.dashboard")}
             </button>
             <button
+              type="button"
               className={`nav-link ${isActive("/appointments")}`}
               onClick={() => navigate("/appointments")}
             >
@@ -84,6 +92,7 @@ export default function AppNavbar() {
             </button>
             {user && (
               <button
+                type="button"
                 className={`nav-link ${isActive("/doctors")}`}
                 onClick={() => navigate("/doctors")}
               >
@@ -91,6 +100,7 @@ export default function AppNavbar() {
               </button>
             )}
             <button
+              type="button"
               className={`nav-link ${isActive("/history")}`}
               onClick={() => navigate("/history")}
             >
@@ -103,30 +113,35 @@ export default function AppNavbar() {
       <div className="navbar-user">
         <LanguageSwitcher />
         {adminUser ? (
-          <button className="nav-logout" onClick={() => signOut(auth).then(() => navigate("/login"))}>
+          <button
+            type="button"
+            className="nav-logout"
+            onClick={() => signOut(auth).then(() => navigate("/login"))}
+          >
             {t("nav.signOut")}
           </button>
         ) : (
-          <div
+          <button
+            type="button"
             className="nav-avatar"
             onClick={() => navigate("/profile")}
             title={t("nav.profile")}
+            aria-label={t("nav.profile")}
           >
             {userProfile?.photoURL ? (
               <img
                 className="nav-avatar-image"
                 src={userProfile.photoURL}
-                alt="Profile"
+                alt={t("nav.profile")}
               />
             ) : (
               user?.displayName?.[0]?.toUpperCase() ||
               user?.email?.[0]?.toUpperCase() ||
               "U"
             )}
-          </div>
+          </button>
         )}
       </div>
     </nav>
   );
 }
-

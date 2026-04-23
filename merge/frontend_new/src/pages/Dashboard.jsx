@@ -1,26 +1,36 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { collection, onSnapshot } from "firebase/firestore";
-import { auth } from "../lib/firebase";
+import { auth, db } from "../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import AppNavbar from "../components/AppNavbar";
 import { apiFetch } from "../lib/api";
-import { db } from "../lib/firebase";
 import { DEFAULT_DOCTORS, normalizeDoctorDoc } from "../lib/doctors";
 import { loadIsAdminByUid } from "../lib/admin";
 import { useTranslation } from "react-i18next";
 import "../styles/dash.css";
 
-/* ─── Symptom list ─── */
 const SYMPTOMS = [
-  "Headache", "Fever", "Fatigue", "Cough", "Sore throat", "Nausea",
-  "Shortness of breath", "Chest pain", "Back pain", "Dizziness",
-  "Rash", "Joint pain", "Vomiting", "Loss of appetite", "Blurred vision",
+  "Headache",
+  "Fever",
+  "Fatigue",
+  "Cough",
+  "Sore throat",
+  "Nausea",
+  "Shortness of breath",
+  "Chest pain",
+  "Back pain",
+  "Dizziness",
+  "Rash",
+  "Joint pain",
+  "Vomiting",
+  "Loss of appetite",
+  "Blurred vision",
 ];
 
 function haversineKm(lat1, lon1, lat2, lon2) {
   const toRad = (d) => (d * Math.PI) / 180;
-  const R = 6371;
+  const r = 6371;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
   const a =
@@ -29,7 +39,7 @@ function haversineKm(lat1, lon1, lat2, lon2) {
       Math.cos(toRad(lat2)) *
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
-  return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+  return r * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 }
 
 function inferSpecialties(aiResult, selectedSymptoms) {
@@ -47,7 +57,6 @@ function inferSpecialties(aiResult, selectedSymptoms) {
   return spec;
 }
 
-/* ─── Dashboard ─── */
 export default function Dashboard() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -64,11 +73,11 @@ export default function Dashboard() {
   const [doctorDirectory, setDoctorDirectory] = useState(DEFAULT_DOCTORS);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Auth guard
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
-      if (!user) navigate("/login");
-      else {
+      if (!user) {
+        navigate("/login");
+      } else {
         const admin = await loadIsAdminByUid(user.uid);
         setIsAdmin(admin);
         if (admin) {
@@ -101,11 +110,11 @@ export default function Dashboard() {
     return unsubscribe;
   }, [isAdmin]);
 
-  const toggleTag = (s) => {
+  const toggleTag = (symptom) => {
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(s)) next.delete(s);
-      else next.add(s);
+      if (next.has(symptom)) next.delete(symptom);
+      else next.add(symptom);
       return next;
     });
   };
@@ -121,10 +130,10 @@ export default function Dashboard() {
     setCustom("");
   };
 
-  const removeSymptom = (s) => {
+  const removeSymptom = (symptom) => {
     setSelected((prev) => {
       const next = new Set(prev);
-      next.delete(s);
+      next.delete(symptom);
       return next;
     });
   };
@@ -134,6 +143,7 @@ export default function Dashboard() {
       setError(t("dashboard.symptoms.selectAtLeastOne"));
       return;
     }
+
     setError("");
     setLoading(true);
     setAiResult(null);
@@ -141,12 +151,10 @@ export default function Dashboard() {
     setNearbyDoctors([]);
     setNearbyError("");
 
-    const symptoms = [...selected];
-
     try {
       const data = await apiFetch("/predict", {
         method: "POST",
-        body: { symptoms },
+        body: { symptoms: [...selected] },
       });
 
       if (!data || !data.aiResult) {
@@ -168,7 +176,14 @@ export default function Dashboard() {
     Soon: "#f39c12",
     Urgent: "#e74c3c",
   };
-  const likelColor = { High: "#e74c3c", Medium: "#f39c12", Low: "#2ecc71" };
+  const likelihoodColor = { High: "#e74c3c", Medium: "#f39c12", Low: "#2ecc71" };
+
+  const getLikelihoodLabel = (value) => {
+    const normalized = String(value || "").toLowerCase();
+    if (normalized === "high") return t("common.likelihood.high");
+    if (normalized === "medium") return t("common.likelihood.medium");
+    return t("common.likelihood.low");
+  };
 
   const suggestNearbyDoctors = () => {
     if (!aiResult) return;
@@ -177,13 +192,16 @@ export default function Dashboard() {
       setNearbyDoctors([]);
       return;
     }
+
     setNearbyLoading(true);
     setNearbyError("");
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         const userLat = Number(latitude);
         const userLng = Number(longitude);
+
         if (!Number.isFinite(userLat) || !Number.isFinite(userLng)) {
           setNearbyDoctors([]);
           setNearbyError(t("dashboard.nearby.locationError"));
@@ -217,11 +235,11 @@ export default function Dashboard() {
       (geoError) => {
         const code = geoError?.code;
         if (code === 1) {
-          setNearbyError("Location permission denied. Enable location permission for this site and your browser.");
+          setNearbyError(t("dashboard.nearby.permissionDenied"));
         } else if (code === 2) {
-          setNearbyError("Location unavailable right now. Check your device location services and try again.");
+          setNearbyError(t("dashboard.nearby.locationUnavailable"));
         } else if (code === 3) {
-          setNearbyError("Location request timed out. Please try again.");
+          setNearbyError(t("dashboard.nearby.locationTimeout"));
         } else {
           setNearbyError(t("dashboard.nearby.locationError"));
         }
@@ -240,7 +258,7 @@ export default function Dashboard() {
       <div className="dashboard">
         <section className="top">
           <h1>
-            {t("dashboard.title")} <span>today?</span>
+            {t("dashboard.title")} <span>{t("dashboard.titleSuffix")}</span>
           </h1>
           <p>{t("dashboard.subtitle")}</p>
         </section>
@@ -249,13 +267,14 @@ export default function Dashboard() {
           <h2>{t("dashboard.symptoms.title")}</h2>
 
           <div className="tags">
-            {SYMPTOMS.map((s) => (
+            {SYMPTOMS.map((symptom) => (
               <button
-                key={s}
-                className={`tag ${selected.has(s) ? "active" : ""}`}
-                onClick={() => toggleTag(s)}
+                key={symptom}
+                type="button"
+                className={`tag ${selected.has(symptom) ? "active" : ""}`}
+                onClick={() => toggleTag(symptom)}
               >
-                {t(`dashboard.symptoms.list.${s}`, s)}
+                {t(`dashboard.symptoms.list.${symptom}`, symptom)}
               </button>
             ))}
           </div>
@@ -265,17 +284,21 @@ export default function Dashboard() {
               value={custom}
               onChange={(e) => setCustom(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addCustom()}
-              placeholder={t("dashboard.symptoms.title") + "…"}
+              placeholder={t("dashboard.symptoms.customPlaceholder")}
             />
-            <button onClick={addCustom}>+ {t("common.save")}</button>
+            <button type="button" onClick={addCustom}>
+              + {t("common.add")}
+            </button>
           </div>
 
           {selected.size > 0 && (
             <div className="selected">
-              {[...selected].map((s) => (
-                <span key={s}>
-                  {t(`dashboard.symptoms.list.${s}`, s)}
-                  <button onClick={() => removeSymptom(s)}>×</button>
+              {[...selected].map((symptom) => (
+                <span key={symptom}>
+                  {t(`dashboard.symptoms.list.${symptom}`, symptom)}
+                  <button type="button" onClick={() => removeSymptom(symptom)} aria-label={t("common.delete")}>
+                    x
+                  </button>
                 </span>
               ))}
             </div>
@@ -283,18 +306,14 @@ export default function Dashboard() {
 
           {error && <div className="dash-error">{error}</div>}
 
-          <button
-            className="analyze"
-            onClick={runDiagnosis}
-            disabled={loading}
-          >
+          <button className="analyze" type="button" onClick={runDiagnosis} disabled={loading}>
             {loading ? t("dashboard.symptoms.analyzing") : t("dashboard.symptoms.analyze")}
           </button>
         </div>
 
         {loading && (
           <div className="loader">
-            <div className="spinner"></div>
+            <div className="spinner" />
             <p>{t("dashboard.symptoms.analyzing")}</p>
           </div>
         )}
@@ -311,12 +330,11 @@ export default function Dashboard() {
                   border: `1px solid ${(urgencyColor[aiResult.urgency] || "#2ecc71")}44`,
                 }}
               >
-                {aiResult.urgency === "Urgent" ? "⚠ " : aiResult.urgency === "Soon" ? "⏱ " : "✓ "}
                 {aiResult.urgency === "Urgent"
                   ? t("dashboard.results.urgent")
                   : aiResult.urgency === "Soon"
-                  ? t("dashboard.results.soon")
-                  : t("dashboard.results.routine")}
+                    ? t("dashboard.results.soon")
+                    : t("dashboard.results.routine")}
               </span>
             </div>
 
@@ -329,37 +347,37 @@ export default function Dashboard() {
                   background: "rgba(52, 152, 219, 0.08)",
                 }}
               >
-                <span className="advice-icon">🤖</span>
+                <span className="advice-icon">AI</span>
                 <p>{analysisMessage}</p>
               </div>
             )}
 
             {aiResult.advice && (
               <div className="ai-advice">
-                <span className="advice-icon">💬</span>
+                <span className="advice-icon">i</span>
                 <p>{aiResult.advice}</p>
               </div>
             )}
 
             <h2>{t("dashboard.results.possibleConditions")}</h2>
-            {aiResult.conditions?.map((c, i) => (
-              <div className="condition" key={i}>
+            {aiResult.conditions?.map((condition, index) => (
+              <div className="condition" key={index}>
                 <div className="condition-header">
-                  <h3>{c.name}</h3>
+                  <h3>{condition.name}</h3>
                   <span
                     className="likelihood"
                     style={{
-                      color: likelColor[c.likelihood] || "#f39c12",
-                      background: (likelColor[c.likelihood] || "#f39c12") + "15",
+                      color: likelihoodColor[condition.likelihood] || "#f39c12",
+                      background: (likelihoodColor[condition.likelihood] || "#f39c12") + "15",
                     }}
                   >
-                    {c.likelihood} likelihood
+                    {getLikelihoodLabel(condition.likelihood)}
                   </span>
                 </div>
-                <p>{c.description}</p>
-                {c.specialist && (
+                <p>{condition.description}</p>
+                {condition.specialist && (
                   <div className="specialist-tag">
-                    <span>👨‍⚕️ {t("dashboard.results.recommendation")}: {c.specialist}</span>
+                    <span>{t("dashboard.results.recommendation")}: {condition.specialist}</span>
                   </div>
                 )}
               </div>
@@ -367,7 +385,7 @@ export default function Dashboard() {
 
             {aiResult.disclaimer && (
               <div className="disclaimer">
-                <span>⚠️</span>
+                <span>!</span>
                 <p>{aiResult.disclaimer}</p>
               </div>
             )}
@@ -376,6 +394,7 @@ export default function Dashboard() {
               <div className="nearby-head">
                 <h2>{t("dashboard.nearby.title")}</h2>
                 <button
+                  type="button"
                   className="history-clear-btn"
                   onClick={suggestNearbyDoctors}
                   disabled={nearbyLoading}
@@ -391,11 +410,13 @@ export default function Dashboard() {
                       key={doctor.id}
                       type="button"
                       className="nearby-card"
-                      onClick={() => navigate(`/appointments?doctorId=${encodeURIComponent(doctor.id)}`)}
+                      onClick={() =>
+                        navigate(`/appointments?doctorId=${encodeURIComponent(doctor.id)}`)
+                      }
                     >
                       <h3>{doctor.name}</h3>
                       <p>{doctor.specialty}</p>
-                      <span>{doctor.clinic}, {doctor.city}</span>
+                      <span>{[doctor.clinic, doctor.city].filter(Boolean).join(", ")}</span>
                       <small>
                         {Number.isFinite(doctor.distanceKm)
                           ? `${doctor.distanceKm.toFixed(1)} ${t("dashboard.nearby.km")}`

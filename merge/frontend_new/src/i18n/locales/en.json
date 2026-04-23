@@ -6,7 +6,8 @@
     "history": "History",
     "reviewRequests": "Review Requests",
     "signOut": "Sign out",
-    "brandName": "Smart Medic"
+    "brandName": "Smart Medic",
+    "profile": "Profile"
   },
   "login": {
     "signIn": "Sign In",
@@ -27,7 +28,13 @@
       "unauthorizedDomain": "This app domain is not authorized in Firebase Auth settings.",
       "operationNotAllowed": "Google sign-in is not enabled in Firebase Authentication.",
       "accountExists": "An account already exists with this email using a different sign-in method.",
-      "googleFailed": "Google login failed"
+      "googleFailed": "Google login failed",
+      "requiredFields": "Please fill in all required fields.",
+      "passwordMismatch": "Passwords do not match.",
+      "invalidCredentials": "Invalid email or password.",
+      "emailInUse": "An account with this email already exists.",
+      "weakPassword": "Password is too weak. Use at least 6 characters.",
+      "authFailed": "Authentication failed. Please try again."
     }
   },
   "dashboard": {
@@ -55,7 +62,8 @@
         "Vomiting": "Vomiting",
         "Loss of appetite": "Loss of appetite",
         "Blurred vision": "Blurred vision"
-      }
+      },
+      "customPlaceholder": "Add a custom symptom..."
     },
     "results": {
       "title": "Analysis Results",
@@ -75,12 +83,16 @@
       "locationError": "Could not read your current location accurately. Please try again.",
       "noDoctors": "No nearby doctors with location coordinates are available yet.",
       "bookAppointment": "Book Appointment",
-      "km": "km"
+      "km": "km",
+      "permissionDenied": "Location permission denied. Enable location access and try again.",
+      "locationUnavailable": "Location is unavailable right now. Check device location services and retry.",
+      "locationTimeout": "Location request timed out. Please try again."
     },
     "errors": {
       "malformedResponse": "Malformed response from server.",
       "analysisFailed": "Analysis failed. Please check the backend is running and try again."
-    }
+    },
+    "titleSuffix": "today?"
   },
   "appointments": {
     "title": "Request an",
@@ -102,13 +114,21 @@
       "sendFailed": "Failed to send appointment request."
     },
     "success": "Your appointment request was sent successfully!",
-    "replyNote": "Please reply directly to this email to agree on the final appointment time."
+    "replyNote": "Please reply directly to this email to agree on the final appointment time.",
+    "subtitle": "This page starts the appointment conversation. The request is sent by email, then doctor and patient can confirm the final time by replying.",
+    "mapTitle": "Map for {{name}}",
+    "openDirections": "Open directions in Google Maps",
+    "directionsUnavailable": "Directions are unavailable for this doctor right now because map coordinates are missing.",
+    "defaults": {
+      "doctor": "Doctor",
+      "patient": "Patient"
+    }
   },
   "history": {
     "title": "Your",
     "titleSpan": "Analysis History",
     "subtitle": "Review your past symptom checks and AI results",
-    "loading": "Loading your history…",
+    "loading": "Loading your historyâ€¦",
     "noHistory": "No history yet",
     "noHistoryDesc": "Run your first symptom analysis from the Dashboard.",
     "possibleConditions": "Possible Conditions",
@@ -118,8 +138,17 @@
     "soon": "Soon",
     "errors": {
       "loadFailed": "Could not load history. Please check the backend is running.",
-      "deleteFailed": "Could not delete this entry."
-    }
+      "deleteFailed": "Could not delete this entry.",
+      "partialClear": "Partial clear: could not delete one or more entries ({{message}})."
+    },
+    "analysisCount": "{{count}} analyses",
+    "clearAll": "Clear all",
+    "confirmClear": "Clear all {{count}} saved analyses? This cannot be undone.",
+    "hide": "Hide",
+    "view": "View",
+    "moreSymptoms": "+{{count}} more",
+    "modelHintLabel": "Model hint",
+    "routine": "Routine"
   },
   "profile": {
     "title": "My Profile",
@@ -152,7 +181,12 @@
       "imageProcessingFailed": "Image processing failed.",
       "invalidImageFile": "Invalid image file.",
       "couldNotReadFile": "Could not read image file."
-    }
+    },
+    "subtitle": "Manage your account details and security settings.",
+    "titleMark": "*",
+    "personalInfo": "Personal information",
+    "passwordHelp": "Change your password to improve account security.",
+    "avatarAlt": "Profile avatar"
   },
   "doctors": {
     "listTitle": "Doctors",
@@ -170,12 +204,21 @@
     "specialtyPlaceholder": "Specialty",
     "clinicPlaceholder": "Clinic or hospital",
     "cityPlaceholder": "City",
+    "locationTitle": "Clinic location",
+    "locationHint": "Click on the map to pin your clinic location. This is required for nearby doctors and directions.",
+    "locationSelectedLabel": "Selected location",
+    "locationNone": "No location selected yet",
+    "clearLocation": "Clear location",
     "sendRequest": "Send Request",
     "errors": {
       "completeFields": "Please complete your name, email, and specialty.",
+      "locationRequired": "Please choose your clinic location on the map.",
       "sendFailed": "Failed to send request."
     },
-    "requestSaved": "Your request has been saved. An admin can review it and approve it from the requests page."
+    "requestSaved": "Your request has been saved. An admin can review it and approve it from the requests page.",
+    "requestSubtitle": "If you are a doctor and want to be added, use the request form below.",
+    "requestDescription": "Send your details and we will review them before adding you to the doctor directory.",
+    "messagePlaceholder": "Short message for the admin team"
   },
   "doctorRequests": {
     "title": "Doctor",
@@ -189,14 +232,27 @@
     "rejected": "Rejected",
     "justNow": "Just now",
     "clinicNotListed": "Clinic not listed",
+    "locationLabel": "Location",
+    "locationMissing": "Location not provided",
     "errors": {
       "approveFailed": "Could not approve request.",
       "rejectFailed": "Could not reject request."
+    },
+    "statusLabel": "Status",
+    "submittedLabel": "Submitted",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "messages": {
+      "approvedAdded": "{{name}} was approved and added to the doctors list.",
+      "rejected": "{{name}} was rejected."
     }
   },
   "learn": {
     "heroTitle": "Your Smart Health Assistant",
-    "heroSubtitle": "Analyze symptoms, find the right specialists, and manage your health — all in one place.",
+    "heroSubtitle": "Analyze symptoms, find the right specialists, and manage your health â€” all in one place.",
     "getStarted": "Get Started",
     "featuresTitle": "Why Choose Smart Medic?",
     "features": {
@@ -240,7 +296,23 @@
         "desc": "Receive clear results with recommended specialists and next steps."
       }
     },
-    "startNow": "Start Now"
+    "startNow": "Start Now",
+    "heroBadge": "AI-powered health assistant",
+    "heroTitleEmphasis": "before you see a doctor",
+    "sectionProcess": "Process",
+    "sectionFeatures": "Features",
+    "stats": {
+      "symptoms": "Symptoms covered",
+      "analysis": "Powered analysis",
+      "availability": "Always available"
+    },
+    "disclaimer": {
+      "title": "Important disclaimer",
+      "body": "Smart Medic is an informational tool and does not provide diagnosis, treatment, or professional medical advice. Always consult a qualified healthcare professional. In emergencies, contact emergency services immediately."
+    },
+    "ctaTitle": "Ready to understand your health?",
+    "ctaBody": "Join Smart Medic today and get instant AI-powered symptom analysis.",
+    "footer": "? {{year}} Smart Medic - AI Health Assistant"
   },
   "common": {
     "loading": "Loading...",
@@ -257,12 +329,21 @@
     "search": "Search",
     "noData": "No data available",
     "specialty": "Specialty",
-    "generalMedicine": "General Medicine"
+    "generalMedicine": "General Medicine",
+    "add": "Add",
+    "likelihood": {
+      "high": "High likelihood",
+      "medium": "Medium likelihood",
+      "low": "Low likelihood"
+    }
   },
   "lang": {
     "select": "Language",
     "en": "English",
-    "fr": "Français",
-    "ar": "العربية"
+    "fr": "FranÃ§ais",
+    "ar": "Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©"
+  },
+  "quest": {
+    "learnMore": "Learn more"
   }
 }

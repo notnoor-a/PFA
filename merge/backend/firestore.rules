@@ -65,7 +65,22 @@ service cloud.firestore {
     // Keep this signed-in only by project choice.
     match /doctorRequests/{requestId} {
       allow create: if isSignedIn()
-                    && request.resource.data.status == "pending";
+                    && request.resource.data.status == "pending"
+                    && request.resource.data.submittedByUid == request.auth.uid
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 1
+                    && request.resource.data.email is string
+                    && request.resource.data.email.size() > 3
+                    && request.resource.data.specialty is string
+                    && request.resource.data.specialty.size() > 1
+                    && request.resource.data.lat is number
+                    && request.resource.data.lng is number
+                    && request.resource.data.lat >= -90
+                    && request.resource.data.lat <= 90
+                    && request.resource.data.lng >= -180
+                    && request.resource.data.lng <= 180
+                    && request.resource.data.locationLabel is string
+                    && request.resource.data.locationLabel.size() > 0;
       allow read, update: if isAdmin();
       allow delete: if false;
     }

@@ -1,17 +1,16 @@
-import { useTranslation } from "react-i18next";
+﻿import { useTranslation } from "react-i18next";
 import { useEffect } from "react";
 
 const LANGUAGES = [
-  { code: "en", label: "EN", flag: "🇬🇧" },
-  { code: "fr", label: "FR", flag: "🇫🇷" },
-  { code: "ar", label: "ع", flag: "🇹🇳" },
+  { code: "en", label: "EN" },
+  { code: "fr", label: "FR" },
+  { code: "ar", label: "AR" },
 ];
 
 export default function LanguageSwitcher() {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const currentLang = i18n.language?.split("-")[0] || "en";
 
-  // Apply RTL direction for Arabic
   useEffect(() => {
     const dir = currentLang === "ar" ? "rtl" : "ltr";
     document.documentElement.setAttribute("dir", dir);
@@ -24,16 +23,17 @@ export default function LanguageSwitcher() {
   };
 
   return (
-    <div className="lang-switcher" role="group" aria-label="Language selector">
-      {LANGUAGES.map(({ code, label, flag }) => (
+    <div className="lang-switcher" role="group" aria-label={t("lang.select")}>
+      {LANGUAGES.map(({ code, label }) => (
         <button
           key={code}
+          type="button"
           className={`lang-btn ${currentLang === code ? "lang-btn--active" : ""}`}
           onClick={() => handleChange(code)}
-          title={code === "en" ? "English" : code === "fr" ? "Français" : "العربية"}
+          title={t(`lang.${code}`)}
+          aria-label={t(`lang.${code}`)}
           aria-pressed={currentLang === code}
         >
-          <span className="lang-flag">{flag}</span>
           <span className="lang-label">{label}</span>
         </button>
       ))}

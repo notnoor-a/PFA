@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+﻿import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import "../styles/quest.css";
@@ -9,23 +9,22 @@ export default function QuestPage() {
 
   return (
     <div className="quest-page">
-      {/* Sélecteur de langue en haut à droite */}
       <div style={{ position: "fixed", top: "16px", right: "16px", zIndex: 100 }}>
         <LanguageSwitcher />
       </div>
 
       <div className="quest-card">
-        <h1>🩺 {t("nav.brandName")}</h1>
+        <h1>+ {t("nav.brandName")}</h1>
 
         <p>{t("learn.heroSubtitle")}</p>
 
         <div className="quest-actions">
-          <button onClick={() => navigate("/login")} className="btn primary">
+          <button onClick={() => navigate("/login")} className="btn primary" type="button">
             {t("learn.getStarted")}
           </button>
 
           <button type="button" className="btn outline" onClick={() => navigate("/learn")}>
-            Learn More
+            {t("quest.learnMore")}
           </button>
         </div>
       </div>

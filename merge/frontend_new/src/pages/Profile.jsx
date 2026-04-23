@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signOut, updatePassword, updateProfile as updateAuthProfile } from "firebase/auth";
 import { doc, onSnapshot, serverTimestamp, setDoc } from "firebase/firestore";
@@ -8,10 +8,6 @@ import { auth, db, storage } from "../lib/firebase";
 import { loadIsAdminByUid } from "../lib/admin";
 import { useTranslation } from "react-i18next";
 import "../styles/dash.css";
-
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
 
 function calculateAge(dateStr) {
   if (!dateStr) return 0;
@@ -37,20 +33,27 @@ function resizeAndCropImage(file, targetSize = 512) {
         canvas.width = targetSize;
         canvas.height = targetSize;
         const ctx = canvas.getContext("2d");
-        if (!ctx) { reject(new Error("Canvas context unavailable.")); return; }
+        if (!ctx) {
+          reject(new Error("canvasUnavailable"));
+          return;
+        }
         ctx.drawImage(img, sx, sy, side, side, 0, 0, targetSize, targetSize);
         canvas.toBlob(
           (blob) => {
-            if (!blob) { reject(new Error("Image processing failed.")); return; }
+            if (!blob) {
+              reject(new Error("imageProcessingFailed"));
+              return;
+            }
             resolve(blob);
           },
-          "image/jpeg", 0.9
+          "image/jpeg",
+          0.9
         );
       };
-      img.onerror = () => reject(new Error("Invalid image file."));
+      img.onerror = () => reject(new Error("invalidImageFile"));
       img.src = String(reader.result);
     };
-    reader.onerror = () => reject(new Error("Could not read image file."));
+    reader.onerror = () => reject(new Error("couldNotReadFile"));
     reader.readAsDataURL(file);
   });
 }
@@ -71,9 +74,15 @@ export default function Profile() {
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(async (user) => {
-      if (!user) { navigate("/login"); return; }
+      if (!user) {
+        navigate("/login");
+        return;
+      }
       const isAdmin = await loadIsAdminByUid(user.uid);
-      if (isAdmin) { navigate("/doctors"); return; }
+      if (isAdmin) {
+        navigate("/doctors");
+        return;
+      }
       setUid(user.uid);
       setAuthChecked(true);
     });
@@ -84,9 +93,10 @@ export default function Profile() {
     if (!uid) return;
     const unsub = onSnapshot(doc(db, "users", uid), (snap) => {
       const data = snap.data() || {};
+      const authEmail = auth.currentUser?.email || "";
       setProfile({
         name: data.name || auth.currentUser?.displayName || "",
-        email: data.email || auth.currentUser?.email || "",
+        email: authEmail || data.email || "",
         birthDate: data.birthDate || "",
         photoURL: data.photoURL || auth.currentUser?.photoURL || "",
       });
@@ -94,23 +104,34 @@ export default function Profile() {
     return unsub;
   }, [uid]);
 
-  const saveProfile = async (e) => {
-    e.preventDefault();
-    setError(""); setStatus("");
+  const saveProfile = async (event) => {
+    event.preventDefault();
+    setError("");
+    setStatus("");
     if (!uid) return;
+
     const trimmedName = profile.name.trim();
-    const trimmedEmail = profile.email.trim();
-    if (trimmedName.length < 2) { setError(t("profile.errors.nameShort")); return; }
-    if (!isValidEmail(trimmedEmail)) { setError(t("profile.errors.invalidEmail")); return; }
-    if (profile.birthDate && calculateAge(profile.birthDate) < 13) {
-      setError(t("profile.errors.ageTooYoung")); return;
+
+    if (trimmedName.length < 2) {
+      setError(t("profile.errors.nameShort"));
+      return;
     }
+    if (profile.birthDate && calculateAge(profile.birthDate) < 13) {
+      setError(t("profile.errors.ageTooYoung"));
+      return;
+    }
+
     setProfileBusy(true);
     try {
-      await setDoc(doc(db, "users", uid), {
-        name: trimmedName, email: trimmedEmail,
-        birthDate: profile.birthDate || "", updatedAt: serverTimestamp(),
-      }, { merge: true });
+      await setDoc(
+        doc(db, "users", uid),
+        {
+          name: trimmedName,
+          birthDate: profile.birthDate || "",
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
       if (auth.currentUser && trimmedName) {
         await updateAuthProfile(auth.currentUser, { displayName: trimmedName });
       }
@@ -125,7 +146,10 @@ export default function Profile() {
   const uploadPhoto = async (event) => {
     const file = event.target.files?.[0];
     if (!file || !uid) return;
-    setError(""); setStatus(""); setPhotoBusy(true);
+
+    setError("");
+    setStatus("");
+    setPhotoBusy(true);
     try {
       if (!file.type.startsWith("image/")) throw new Error(t("profile.errors.notImageFile"));
       const processedBlob = await resizeAndCropImage(file);
@@ -136,23 +160,43 @@ export default function Profile() {
       if (auth.currentUser) await updateAuthProfile(auth.currentUser, { photoURL });
       setStatus(t("profile.success.photoUploaded"));
     } catch (err) {
-      setError(err.message || t("profile.errors.photoFailed"));
+      const code = err?.message;
+      if (code && code in {
+        canvasUnavailable: true,
+        imageProcessingFailed: true,
+        invalidImageFile: true,
+        couldNotReadFile: true,
+      }) {
+        setError(t(`profile.errors.${code}`));
+      } else {
+        setError(err.message || t("profile.errors.photoFailed"));
+      }
     } finally {
       setPhotoBusy(false);
       event.target.value = "";
     }
   };
 
-  const savePassword = async (e) => {
-    e.preventDefault();
-    setError(""); setStatus("");
-    if (!newPassword || newPassword.length < 6) { setError(t("profile.errors.passwordShort")); return; }
-    if (newPassword !== confirmPassword) { setError(t("profile.errors.passwordMismatch")); return; }
+  const savePassword = async (event) => {
+    event.preventDefault();
+    setError("");
+    setStatus("");
+
+    if (!newPassword || newPassword.length < 6) {
+      setError(t("profile.errors.passwordShort"));
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError(t("profile.errors.passwordMismatch"));
+      return;
+    }
     if (!auth.currentUser) return;
+
     setPasswordBusy(true);
     try {
       await updatePassword(auth.currentUser, newPassword);
-      setNewPassword(""); setConfirmPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
       setStatus(t("profile.success.passwordChanged"));
     } catch (err) {
       setError(err.message || t("profile.errors.passwordFailed"));
@@ -174,9 +218,9 @@ export default function Profile() {
       <div className="dashboard profile-page">
         <section className="top">
           <h1>
-            {t("profile.title")} <span>✦</span>
+            {t("profile.title")} <span>{t("profile.titleMark")}</span>
           </h1>
-          <p>Manage your account details and security settings.</p>
+          <p>{t("profile.subtitle")}</p>
         </section>
 
         {error && <div className="dash-error">{error}</div>}
@@ -184,12 +228,12 @@ export default function Profile() {
 
         <div className="profile-grid">
           <div className="card profile-card">
-            <h2>Personal information</h2>
+            <h2>{t("profile.personalInfo")}</h2>
             <div className="profile-avatar-wrap">
               <img
                 className="profile-avatar"
                 src={profile.photoURL || "https://placehold.co/120x120/1B3F72/ffffff?text=U"}
-                alt="Profile avatar"
+                alt={t("profile.avatarAlt")}
               />
               <label className="btn small" htmlFor="profile-photo-input">
                 {photoBusy ? t("common.loading") : t("profile.uploadPhoto")}
@@ -214,7 +258,7 @@ export default function Profile() {
                 type="email"
                 placeholder={t("profile.email")}
                 value={profile.email}
-                onChange={(e) => setProfile((p) => ({ ...p, email: e.target.value }))}
+                readOnly
               />
               <input
                 type="date"
@@ -222,14 +266,14 @@ export default function Profile() {
                 onChange={(e) => setProfile((p) => ({ ...p, birthDate: e.target.value }))}
               />
               <button className="analyze" type="submit" disabled={profileBusy}>
-                {profileBusy ? t("common.loading") : t("profile.saveChanges")}
+                {profileBusy ? t("profile.saving") : t("profile.saveChanges")}
               </button>
             </form>
           </div>
 
           <div className="card profile-card">
             <h2>{t("profile.changePassword")}</h2>
-            <p className="profile-sub">Change your password for better account security.</p>
+            <p className="profile-sub">{t("profile.passwordHelp")}</p>
             <form className="auth-form" onSubmit={savePassword}>
               <input
                 type="password"

@@ -6,23 +6,25 @@
 .lang-switcher {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   background: rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 3px;
+  border-radius: 10px;
+  padding: 4px;
+  max-width: 100%;
 }
 
 .lang-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
+  justify-content: center;
+  min-width: 38px;
+  padding: 5px 8px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: transparent;
   color: var(--text-muted, #aaa);
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: 0.72rem;
+  font-weight: 700;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
@@ -38,13 +40,19 @@
   color: #fff;
 }
 
-.lang-flag {
-  font-size: 0.85rem;
+.lang-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  line-height: 1;
 }
 
-.lang-label {
-  font-size: 0.7rem;
-  letter-spacing: 0.03em;
+.navbar-user .lang-switcher {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.navbar-user .lang-btn {
+  min-width: 34px;
+  padding: 5px 7px;
 }
 
 /* ─────────────────────────────────────────────
@@ -65,6 +73,7 @@
 
 [dir="rtl"] .navbar-user {
   flex-direction: row-reverse;
+  justify-content: flex-start;
 }
 
 [dir="rtl"] .navbar-brand {
@@ -89,6 +98,22 @@
 /* Flip icons that indicate direction */
 [dir="rtl"] .nav-logo {
   transform: scaleX(-1);
+}
+
+@media (max-width: 600px) {
+  .lang-switcher {
+    gap: 2px;
+    padding: 3px;
+  }
+
+  .lang-btn {
+    min-width: 30px;
+    padding: 4px 6px;
+  }
+
+  .lang-label {
+    font-size: 0.62rem;
+  }
 }
 
 /* Input alignment */

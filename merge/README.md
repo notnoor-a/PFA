@@ -40,6 +40,14 @@ npm install
 npm run dev
 ```
 
+### Windows shortcut
+
+On Windows (especially if PowerShell blocks `npm` scripts), you can run:
+
+```bat
+start-dev.cmd
+```
+
 ## Validation Commands
 
 ### Frontend

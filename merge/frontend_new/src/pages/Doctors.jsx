@@ -1,15 +1,26 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { addDoc, collection, onSnapshot, serverTimestamp } from "firebase/firestore";
 import AppNavbar from "../components/AppNavbar";
 import { auth, db } from "../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { loadIsAdminByUid } from "../lib/admin";
-import { DEFAULT_DOCTORS, normalizeDoctorDoc } from "../lib/doctors";
+import { DEFAULT_DOCTORS, formatCoordinateLabel, normalizeDoctorDoc } from "../lib/doctors";
+import LocationPickerMap from "../components/LocationPickerMap";
 import { useTranslation } from "react-i18next";
 import "../styles/dash.css";
 
-const INITIAL_FORM = { name: "", email: "", specialty: "", clinic: "", city: "", message: "" };
+const INITIAL_FORM = {
+  name: "",
+  email: "",
+  specialty: "",
+  clinic: "",
+  city: "",
+  message: "",
+  lat: null,
+  lng: null,
+  locationLabel: "",
+};
 
 export default function Doctors() {
   const navigate = useNavigate();
@@ -23,7 +34,10 @@ export default function Doctors() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (!currentUser) { navigate("/login"); return; }
+      if (!currentUser) {
+        navigate("/login");
+        return;
+      }
       const isAdmin = await loadIsAdminByUid(currentUser.uid);
       setAdminUser(isAdmin);
       setAuthChecked(true);
@@ -34,7 +48,7 @@ export default function Doctors() {
   useEffect(() => {
     if (!adminUser) return;
     const unsubscribe = onSnapshot(collection(db, "doctors"), (snapshot) => {
-      const loadedDoctors = snapshot.docs.map(normalizeDoctorDoc).filter((d) => d.isActive);
+      const loadedDoctors = snapshot.docs.map(normalizeDoctorDoc).filter((doctor) => doctor.isActive);
       setDoctorDirectory(loadedDoctors.length > 0 ? loadedDoctors : DEFAULT_DOCTORS);
     });
     return unsubscribe;
@@ -47,6 +61,20 @@ export default function Doctors() {
       setStatus({ kind: "error", message: t("doctors.errors.completeFields") });
       return;
     }
+
+    const lat = Number(form.lat);
+    const lng = Number(form.lng);
+    const locationLabel = String(form.locationLabel || "").trim() || formatCoordinateLabel(lat, lng);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || !locationLabel) {
+      setStatus({ kind: "error", message: t("doctors.errors.locationRequired") });
+      return;
+    }
+    if (Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+      setStatus({ kind: "error", message: t("doctors.errors.locationRequired") });
+      return;
+    }
+
     setSending(true);
     try {
       await addDoc(collection(db, "doctorRequests"), {
@@ -56,6 +84,9 @@ export default function Doctors() {
         clinic: form.clinic.trim(),
         city: form.city.trim(),
         message: form.message.trim(),
+        lat,
+        lng,
+        locationLabel,
         status: "pending",
         submittedByUid: auth.currentUser?.uid || null,
         submittedAt: serverTimestamp(),
@@ -118,12 +149,12 @@ export default function Doctors() {
           <h1>
             {t("doctors.requestTitle")} <span>{t("doctors.requestTitleSpan")}</span>
           </h1>
-          <p>If you are a doctor and want to be added, use the request form below.</p>
+          <p>{t("doctors.requestSubtitle")}</p>
         </section>
 
         <section className="card appointment-card">
           <h2>{t("doctors.requestJoin")}</h2>
-          <p>Send your details and we will review them before adding you to the doctor directory.</p>
+          <p>{t("doctors.requestDescription")}</p>
 
           {status.message && <div className={`dash-${status.kind}`}>{status.message}</div>}
 
@@ -133,13 +164,13 @@ export default function Doctors() {
                 type="text"
                 placeholder={t("doctors.namePlaceholder")}
                 value={form.name}
-                onChange={(e) => setForm((c) => ({ ...c, name: e.target.value }))}
+                onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))}
               />
               <input
                 type="email"
                 placeholder={t("doctors.emailPlaceholder")}
                 value={form.email}
-                onChange={(e) => setForm((c) => ({ ...c, email: e.target.value }))}
+                onChange={(e) => setForm((current) => ({ ...current, email: e.target.value }))}
               />
             </div>
             <div className="double-row">
@@ -147,27 +178,55 @@ export default function Doctors() {
                 type="text"
                 placeholder={t("doctors.specialtyPlaceholder")}
                 value={form.specialty}
-                onChange={(e) => setForm((c) => ({ ...c, specialty: e.target.value }))}
+                onChange={(e) => setForm((current) => ({ ...current, specialty: e.target.value }))}
               />
               <input
                 type="text"
                 placeholder={t("doctors.clinicPlaceholder")}
                 value={form.clinic}
-                onChange={(e) => setForm((c) => ({ ...c, clinic: e.target.value }))}
+                onChange={(e) => setForm((current) => ({ ...current, clinic: e.target.value }))}
               />
             </div>
             <input
               type="text"
               placeholder={t("doctors.cityPlaceholder")}
               value={form.city}
-              onChange={(e) => setForm((c) => ({ ...c, city: e.target.value }))}
+              onChange={(e) => setForm((current) => ({ ...current, city: e.target.value }))}
             />
+
+            <div className="doctor-location-picker-section">
+              <h3>{t("doctors.locationTitle")}</h3>
+              <p className="profile-sub">{t("doctors.locationHint")}</p>
+              <LocationPickerMap
+                value={form}
+                onChange={(nextLocation) =>
+                  setForm((current) => ({
+                    ...current,
+                    ...nextLocation,
+                  }))
+                }
+                onClear={() =>
+                  setForm((current) => ({
+                    ...current,
+                    lat: null,
+                    lng: null,
+                    locationLabel: "",
+                  }))
+                }
+                labels={{
+                  selectedLabel: t("doctors.locationSelectedLabel"),
+                  noneSelected: t("doctors.locationNone"),
+                  clear: t("doctors.clearLocation"),
+                }}
+              />
+            </div>
+
             <textarea
               className="styled-textarea"
               rows={5}
-              placeholder="Short message for the admin team"
+              placeholder={t("doctors.messagePlaceholder")}
               value={form.message}
-              onChange={(e) => setForm((c) => ({ ...c, message: e.target.value }))}
+              onChange={(e) => setForm((current) => ({ ...current, message: e.target.value }))}
             />
             <button className="analyze" type="submit" disabled={sending}>
               {sending ? t("common.loading") : t("doctors.sendRequest")}

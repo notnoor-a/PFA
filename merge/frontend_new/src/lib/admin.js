@@ -17,14 +17,20 @@ export async function loadIsAdminByUid(uid) {
   }
 }
 
-export async function ensureUserProfile(user) {
+export async function ensureUserProfile(user, profileSeed = {}) {
   if (!user?.uid) return;
+
+  const seededName = String(profileSeed.name || "").trim();
+  const seededBirthDate = String(profileSeed.birthDate || "").trim();
 
   const basePayload = {
     email: user.email || "",
-    name: user.displayName || "",
+    name: seededName || user.displayName || "",
     updatedAt: serverTimestamp(),
   };
+  if (seededBirthDate) {
+    basePayload.birthDate = seededBirthDate;
+  }
 
   const isBootstrapAdmin =
     String(user.email || "").toLowerCase() === ADMIN_BOOTSTRAP_EMAIL;

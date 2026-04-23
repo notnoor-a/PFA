@@ -4,17 +4,28 @@ export const DEFAULT_DOCTORS = [
     name: "Dr. Nader BHM",
     specialty: "General Medicine",
     email: "nhmbhig@gmail.com",
-    clinic: "Hôpital Fattouma Bourguiba",
+    clinic: "Hopital Fattouma Bourguiba",
     city: "Monastir",
     phone: "+213 55 20 11 02",
     lat: 35.770111,
     lng: 10.834,
+    locationLabel: "N\u00B0 35.77011, E\u00B0 10.83400",
   },
 ];
 
 const DEMO_DOCTOR_KEYS = new Set(["dr-nader-bhm"]);
 const DEMO_DOCTOR_EMAIL = "nhmbhig@gmail.com";
 const DEMO_DOCTOR_NAME = "dr. nader bhm";
+
+export function formatCoordinateLabel(lat, lng, precision = 5) {
+  const safeLat = Number(lat);
+  const safeLng = Number(lng);
+  if (!Number.isFinite(safeLat) || !Number.isFinite(safeLng)) return "";
+
+  const ns = safeLat < 0 ? "S" : "N";
+  const ew = safeLng < 0 ? "W" : "E";
+  return `${ns}\u00B0 ${Math.abs(safeLat).toFixed(precision)}, ${ew}\u00B0 ${Math.abs(safeLng).toFixed(precision)}`;
+}
 
 function applyDemoDoctorOverrides(doctor) {
   const name = String(doctor.name || "").trim().toLowerCase();
@@ -28,10 +39,11 @@ function applyDemoDoctorOverrides(doctor) {
   return {
     ...doctor,
     name: "Dr. Nader BHM",
-    clinic: "Hôpital Fattouma Bourguiba",
+    clinic: "Hopital Fattouma Bourguiba",
     city: "Monastir",
     lat: 35.770111,
     lng: 10.834,
+    locationLabel: formatCoordinateLabel(35.770111, 10.834),
   };
 }
 
@@ -87,6 +99,7 @@ function resolveCoordinates(data) {
 export function normalizeDoctorDoc(snapshot) {
   const data = snapshot.data() || {};
   const { lat, lng } = resolveCoordinates(data);
+  const storedLocationLabel = String(data.locationLabel || "").trim();
 
   return applyDemoDoctorOverrides({
     id: snapshot.id,
@@ -98,6 +111,7 @@ export function normalizeDoctorDoc(snapshot) {
     phone: String(data.phone || "").trim(),
     lat,
     lng,
+    locationLabel: storedLocationLabel || formatCoordinateLabel(lat, lng),
     isActive: data.isActive !== false,
   });
 }
